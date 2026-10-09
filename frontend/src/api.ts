@@ -1,18 +1,19 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
-export const getHeaders = () => {
+export const getHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
 };
 
 export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...getHeaders(),
+        ...(options.headers as Record<string, string> || {})
+    };
     const res = await fetch(`${API_URL}${endpoint}`, {
         ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...getHeaders(),
-            ...options.headers,
-        }
+        headers
     });
 
     if (!res.ok) {
