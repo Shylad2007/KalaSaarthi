@@ -1,131 +1,125 @@
 # KalaSaarthi
 
-### Empowering Indian artisans with AI-assisted cataloguing and digital market access
+**AI-Driven Market Linkage & Digital Empowerment for Indian Artisans**
 
-KalaSaarthi is a digital platform designed to help traditional and marginalized artisans present their craft online, create clearer product listings, and connect with potential buyers. It combines an artisan-focused product workflow with AI-assisted tools and a buyer marketplace.
-
-> **Project status:** Prototype / active development. Feature availability may vary as integrations and end-to-end testing continue.
+KalaSaarthi is a full-stack platform designed to bridge the digital gap for traditional Indian craftspeople. It equips artisans with AI-powered cataloguing, voice assistance, fair pricing suggestions, and direct access to nationwide buyers through a responsive, modern marketplace.
 
 ---
 
-## The Problem
-
-Many traditional artisans face barriers when trying to sell their work online. Creating professional product descriptions, photographing and listing products, estimating suitable prices, and reaching new customers can be difficult—especially when digital tools are unfamiliar or language is a barrier.
-
-## Our Approach
-
-KalaSaarthi aims to make the process more accessible through a guided digital experience:
-
-- **Simpler product listing:** Help artisans turn basic product information into a structured catalogue entry.
-- **Voice-assisted input:** Support describing products without requiring every detail to be typed.
-- **AI-assisted insights:** Explore product-image analysis and pricing assistance to improve listings.
-- **Digital marketplace:** Give buyers a place to discover artisan products and place orders.
-- **Artisan-focused experience:** Keep product management and order workflows organized in one place.
-
-## Key Features
+## 🌟 Key Features
 
 ### For Artisans
-- Artisan account and profile workflow.
-- Dashboard for managing the artisan experience.
-- Guided product creation and catalogue management.
-- Product image upload.
-- Voice or text-based product description input.
-- AI-assisted catalogue content generation.
-- AI-assisted image analysis and pricing support, where configured.
-- Product and inventory-related tools.
-- Order management.
-- Personalized recommendations and opportunity discovery as those modules are integrated.
+- **Profile & Onboarding:** Step-by-step onboarding capturing craft category, materials, geography, and artisan background.
+- **AI Voice-to-Catalogue:** Speak in natural language (Hindi/English) to transcribe audio into structured product descriptions and tags using Gemini AI.
+- **Image Intelligence & Storage:** Upload product photography directly backed by Supabase Storage with image quality feedback.
+- **Smart Dynamic Pricing:** Pricing assistant evaluating material costs, craft type, and production hours to recommend sustainable selling prices.
+- **Revival Engine:** Product health scoring diagnostics flagging incomplete or underperforming listings with actionable tips.
+- **Government Scheme Linkages:** Curated national and state artisanal initiatives (e.g., PM Vishwakarma Yojana, MUDRA, GeM) matched to the artisan's profile.
+- **Order Management:** View incoming buyer orders, review delivery addresses, and update fulfillment statuses (Placed, Confirmed, Preparing, Shipped, Delivered).
 
 ### For Buyers
-- Browse the product marketplace.
-- View product details.
-- Add products to a cart.
-- Place orders through the prototype checkout flow.
-- View order history and order status, where implemented.
-
-### AI-Assisted Capabilities
-KalaSaarthi is being developed with AI-assisted workflows intended to reduce the effort required to list and present products:
-
-- **Catalogue generation:** Help transform artisan-provided details into a more structured product listing.
-- **Voice transcription:** Convert recorded speech into text for product descriptions, subject to the configured speech/AI service.
-- **Image intelligence:** Explore useful information from uploaded product images.
-- **Pricing assistance:** Provide indicative pricing support; recommendations should be reviewed by the artisan before publishing.
-
-AI-generated content and estimates should be checked by the user. They are intended as assistance, not guaranteed facts or professional valuations.
+- **Handicrafts Marketplace:** Browse authentic crafts filtered by category (Handloom, Pottery, Jewelry, Woodcraft, Embroidery, etc.) and search terms.
+- **Product Details:** High-resolution product images, craft stories, artisan location attribution, and transparent pricing.
+- **Cart & Checkout:** Add items, manage quantities, enter delivery details, and place Cash on Delivery (COD) orders with duplicate prevention.
+- **Order Tracking:** Track placed orders with progressive status updates reflecting real-time artisan fulfillment.
 
 ---
 
-## Technology Stack
+## 💻 Tech Stack
 
-The current development setup has been described as:
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons
+- **Backend:** Python 3.11+, Flask, Flask-CORS, SQLAlchemy / SQLite
+- **AI Integrations:** Google Gemini API (transcription, catalogue generation, pricing guidance)
+- **Object Storage:** Supabase Storage (`supabase-py`) for product image uploads
+- **Authentication:** JWT-based token authentication with role-based routing (Artisan vs. Buyer)
 
-| Layer | Technology |
-|---|---|
-| Frontend | React, TypeScript, Vite |
-| Styling | Tailwind CSS |
-| Backend API | Python, Flask |
-| Local database | SQLite |
-| Cloud database option | PostgreSQL through a configurable database URL, such as Neon |
-| Image storage | Supabase Storage |
-| AI integrations | Google Gemini |
-| Image processing | OpenCV |
+---
 
-The stack and integrations may evolve during development. Check the project configuration files for the exact versions and enabled services.
-
-## High-Level Architecture
+## 📁 Project Structure
 
 ```text
-Artisan / Buyer
-      |
-      v
-React + TypeScript Frontend
-      |
-      v
-Flask API
-  |       |        |
-  v       v        v
-Database  AI APIs  Image Storage
-(SQLite / Gemini   Supabase
- PostgreSQL)       Storage
-      |
-      v
-Products, profiles, carts and orders
+KalaSaarthi/
+├── backend/
+│   ├── app/
+│   │   ├── services/
+│   │   │   ├── ai_service.py     # Gemini AI catalog, voice & pricing helpers
+│   │   │   └── storage.py        # Supabase storage integration & validation
+│   │   └── ...
+│   ├── main.py                   # Flask API entry point & routes
+│   └── requirements.txt          # Python dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/           # Shared layouts & navigation (ArtisanLayout)
+│   │   ├── pages/
+│   │   │   ├── artisan/          # Dashboard, Catalogue, Add/Edit Product, Orders
+│   │   │   ├── auth/             # Artisan & Buyer login / registration
+│   │   │   ├── buyer/            # Marketplace, ProductDetail, Cart, BuyerOrders
+│   │   │   └── Landing.tsx       # Public editorial homepage
+│   │   ├── AuthContext.tsx       # Auth state & token storage
+│   │   ├── api.ts                # API client & fetch wrappers
+│   │   └── index.css             # Design tokens & Tailwind theme
+│   ├── package.json
+│   └── vite.config.ts
+└── README.md
 ```
 
 ---
 
-## Typical User Journey
+## 🚀 Local Setup Instructions
 
-1. A user enters the platform as an artisan or buyer.
-2. An artisan completes their profile and starts creating a product listing.
-3. The artisan uploads product images and provides details through text or the available voice workflow.
-4. Configured AI tools assist with catalogue content and other product insights.
-5. The artisan reviews and saves or publishes the listing.
-6. Buyers discover products, view details, and use the available cart and order flow.
-7. Artisans manage products and incoming orders through their workspace.
+### Prerequisites
+- Node.js (v18 or higher) & npm
+- Python (v3.10 or higher)
 
-The exact journey depends on which modules are enabled in the current build.
+### 1. Backend Setup
 
-## Project Goals
+```bash
+cd backend
+python -m venv venv
 
-- Make digital product cataloguing more approachable for artisans.
-- Reduce the effort needed to prepare product listings.
-- Support voice-assisted and AI-assisted workflows.
-- Improve discoverability of traditional and handmade products.
-- Bring product and order management into a single experience.
-- Explore personalized access to relevant schemes, opportunities, and product-revival guidance.
+# On Windows:
+.\venv\Scripts\activate
+# On Linux/macOS:
+# source venv/bin/activate
 
-## Responsible Use
+pip install -r requirements.txt
+```
 
-- Artisans should review AI-generated descriptions and suggested prices before publishing.
-- Pricing outputs are estimates, not guaranteed market prices.
-- Do not upload personal or confidential information unless the application is designed to handle it safely.
-- Keep secrets in local environment configuration or a dedicated secrets manager.
+Create a `backend/.env` file with the following variables:
 
-## Acknowledgements
+```env
+# Application Secrets
+SECRET_KEY=your_flask_secret_key_here
 
-Built as a project exploring how accessible digital tools and AI-assisted workflows can help traditional artisans showcase their work and reach broader markets.
+# Google Gemini AI
+AI_API_KEY=your_gemini_api_key_here
+
+# Supabase Storage Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_supabase_service_or_anon_key_here
+SUPABASE_BUCKET=product-images
+```
+
+Run the backend server:
+
+```bash
+python main.py
+```
+*Backend runs on `http://127.0.0.1:8000`.*
+
+### 2. Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*Frontend runs on `http://localhost:5173`.*
 
 ---
 
-**KalaSaarthi — preserving craft, enabling discovery.**
+## 📌 Development Status & Current Limitations
+
+- **Current Status:** Core marketplace, authentication, order lifecycle, artisan workspace, and Supabase image uploads are implemented and tested end-to-end.
+- **Payments:** Checkout currently defaults to Cash on Delivery (COD); digital payment gateways (UPI, Razorpay) are planned for subsequent milestones.
+- **AI Rate Limits:** Voice transcription and AI generation feature graceful fallbacks to rule-based heuristics if the external AI service rate-limits or is unavailable.

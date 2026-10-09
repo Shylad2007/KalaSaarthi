@@ -21,89 +21,105 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate("/"); };
-
   const profile = user?.profile;
   const displayName = profile?.name || user?.email?.split("@")[0] || "Artisan";
+  const initial = displayName.charAt(0).toUpperCase();
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-5 py-4 border-b border-[#E8E6E1] flex items-center justify-between">
+        <div>
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, letterSpacing: '-0.02em' }} className="text-lg text-[#0B0B0F]">KalaSaarthi</span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#7CE25B]"></div>
+            <span className="text-xs text-[#6B6860] font-medium">Artisan Portal</span>
+          </div>
+        </div>
+        <button className="lg:hidden text-[#6B6860] hover:text-[#0B0B0F] transition" onClick={() => setMobileOpen(false)}>
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Artisan info */}
+      <div className="px-5 py-4 border-b border-[#E8E6E1]">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-[#0B0B0F] flex-shrink-0" style={{ background: 'linear-gradient(135deg, #7CE25B, #3FC7E9)' }}>
+            {initial}
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-[#0B0B0F] truncate text-sm" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>{displayName}</p>
+            <p className="text-xs text-[#6B6860] truncate">{profile?.craft || "Artisan"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+        <p className="text-[10px] font-semibold text-[#6B6860] uppercase tracking-wider px-3 pb-2 pt-1">Workspace</p>
+        {NAV.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            onClick={() => setMobileOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? "bg-[#0B0B0F] text-white"
+                  : "text-[#6B6860] hover:bg-[#0B0B0F]/5 hover:text-[#0B0B0F]"
+              }`
+            }
+          >
+            <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Logout */}
+      <div className="px-3 py-3 border-t border-[#E8E6E1]">
+        <button
+          onClick={handleLogout}
+          className="flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium text-[#6B6860] hover:bg-red-50 hover:text-red-600 transition-all"
+        >
+          <LogOut className="w-4 h-4 mr-3" />
+          Log out
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-100 shadow-sm flex flex-col transition-transform duration-300
-        ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
-        {/* Logo */}
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <span className="text-xl font-extrabold text-primary">KalaSaarthi</span>
-            <p className="text-xs text-gray-400 font-medium">Artisan Portal</p>
-          </div>
-          <button className="lg:hidden text-gray-500" onClick={() => setMobileOpen(false)}>
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Artisan info */}
-        <div className="px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-              {displayName.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="font-bold text-gray-900 truncate text-sm">{displayName}</p>
-              <p className="text-xs text-gray-400 truncate">{profile?.craft || "Artisan"}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`
-              }
-            >
-              <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Logout */}
-        <div className="px-3 py-4 border-t border-gray-100">
-          <button
-            onClick={handleLogout}
-            className="flex items-center w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all"
-          >
-            <LogOut className="w-5 h-5 mr-3" />
-            Logout
-          </button>
-        </div>
+    <div className="min-h-screen flex bg-[#F7F5F0]">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-[#E8E6E1] flex-col">
+        <SidebarContent />
       </aside>
 
-      {/* Mobile overlay */}
+      {/* Mobile sidebar drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-30 bg-black/30 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+          <aside className="relative z-50 w-64 bg-white h-full flex flex-col shadow-2xl">
+            <SidebarContent />
+          </aside>
+        </div>
       )}
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
         {/* Mobile topbar */}
-        <header className="lg:hidden bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
-          <button onClick={() => setMobileOpen(true)} className="text-gray-500">
-            <Menu className="w-6 h-6" />
+        <header className="lg:hidden bg-white border-b border-[#E8E6E1] px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+          <button onClick={() => setMobileOpen(true)} className="text-[#6B6860] hover:text-[#0B0B0F] transition p-1">
+            <Menu className="w-5 h-5" />
           </button>
-          <span className="text-lg font-bold text-primary">KalaSaarthi</span>
-          <div className="w-6" />
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700 }} className="text-base text-[#0B0B0F]">KalaSaarthi</span>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-[#0B0B0F]" style={{ background: 'linear-gradient(135deg, #7CE25B, #3FC7E9)' }}>
+            {initial}
+          </div>
         </header>
 
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

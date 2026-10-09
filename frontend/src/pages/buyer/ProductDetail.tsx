@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
 import { apiCall } from "../../api";
-import { ShoppingCart, ArrowLeft, MapPin, CheckCircle, Package, Star } from "lucide-react";
+import { ShoppingCart, ArrowLeft, MapPin, CheckCircle, Package, Star, Minus, Plus } from "lucide-react";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -33,83 +33,235 @@ export default function ProductDetail() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
-  if (!product) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">Product not found</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-[#F7F5F0] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#E8E6E1] border-t-[#7CE25B] rounded-full animate-spin" />
+    </div>
+  );
+
+  if (!product) return (
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col items-center justify-center gap-3">
+      <p className="text-5xl">🧶</p>
+      <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-xl text-[#0B0B0F]">
+        Product not found
+      </p>
+      <Link to="/marketplace" className="text-sm text-[#6B6860] hover:text-[#0B0B0F] underline transition">
+        Back to Marketplace
+      </Link>
+    </div>
+  );
+
+  const tags = product.tags ? product.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/marketplace" className="flex items-center text-gray-600 hover:text-primary font-bold transition">
-            <ArrowLeft className="w-5 h-5 mr-2" /> Back to Marketplace
+    <div className="min-h-screen bg-[#F7F5F0]">
+      {/* Navbar */}
+      <header className="bg-white border-b border-[#E8E6E1] sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <Link
+            to="/marketplace"
+            className="flex items-center gap-1.5 text-sm font-medium text-[#6B6860] hover:text-[#0B0B0F] transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Marketplace</span>
+          </Link>
+          <Link
+            to="/"
+            style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
+            className="text-[#0B0B0F] text-lg"
+          >
+            KalaSaarthi
           </Link>
           {user?.role === "buyer" && (
-            <Link to="/cart" className="text-gray-600 hover:text-primary transition p-2"><ShoppingCart className="w-6 h-6" /></Link>
+            <Link to="/cart" className="text-[#6B6860] hover:text-[#0B0B0F] transition p-1.5">
+              <ShoppingCart className="w-5 h-5" />
+            </Link>
           )}
+          {!user?.role && <div className="w-8" />}
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="bg-white rounded-2xl border border-[#E8E6E1] overflow-hidden">
           <div className="flex flex-col lg:flex-row">
-            {/* Image */}
-            <div className="w-full lg:w-1/2 min-h-[400px] bg-gray-100 relative">
+            {/* Image — 40% on desktop */}
+            <div className="w-full lg:w-[40%] min-h-[320px] sm:min-h-[480px] bg-[#F7F5F0] relative flex-shrink-0">
               {product.images?.[0]?.url ? (
-                <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover absolute inset-0" />
+                <img
+                  src={product.images[0].url}
+                  alt={product.name}
+                  className="w-full h-full object-cover absolute inset-0"
+                />
               ) : (
-                <div className="flex items-center justify-center h-full absolute inset-0 text-gray-300"><Package className="w-20 h-20" /></div>
+                <div className="flex items-center justify-center h-full absolute inset-0 text-[#E8E6E1]">
+                  <Package className="w-20 h-20" />
+                </div>
+              )}
+              {/* Quality score badge */}
+              {product.quality_score != null && (
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm border border-[#E8E6E1] rounded-xl px-3 py-1.5 shadow-sm">
+                  <p className="text-[10px] font-semibold text-[#6B6860] uppercase tracking-wider">Quality</p>
+                  <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F] text-sm">
+                    {product.quality_score}/10
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Details */}
-            <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+            {/* Details — 60% on desktop */}
+            <div className="w-full lg:w-[60%] p-6 sm:p-10 flex flex-col">
+              {/* Category badge */}
               {product.category && (
-                <span className="inline-block bg-primary/10 text-primary font-bold text-xs px-3 py-1.5 rounded-full mb-4 w-fit">{product.category}</span>
+                <span className="inline-block border border-[#E8E6E1] text-[#6B6860] text-xs font-semibold px-3 py-1 rounded-full mb-4 w-fit">
+                  {product.category}
+                </span>
               )}
-              <h1 className="text-3xl font-extrabold text-gray-900 mb-3">{product.name}</h1>
-              <div className="flex text-yellow-400 mb-4">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-current" />)}
-                <span className="ml-2 text-gray-500 text-sm font-medium">(Verified Artisan)</span>
-              </div>
-              <p className="text-3xl font-extrabold text-primary mb-6">₹{product.final_price}</p>
-              <p className="text-gray-600 leading-relaxed mb-8">{product.description}</p>
 
-              {/* Spec grid */}
-              <div className="grid grid-cols-2 gap-4 mb-8 bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                {product.materials && <div><p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Materials</p><p className="font-bold text-gray-900 mt-1">{product.materials}</p></div>}
-                {product.color && <div><p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Color</p><p className="font-bold text-gray-900 mt-1">{product.color}</p></div>}
-                {product.production_time && <div><p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Production Time</p><p className="font-bold text-gray-900 mt-1">{product.production_time}</p></div>}
-                {product.views != null && <div><p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Views</p><p className="font-bold text-gray-900 mt-1">{product.views}</p></div>}
+              {/* Product name */}
+              <h1
+                style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em" }}
+                className="text-2xl sm:text-3xl text-[#0B0B0F] mb-2 leading-tight"
+              >
+                {product.name}
+              </h1>
+
+              {/* Stars */}
+              <div className="flex items-center gap-1.5 mb-3">
+                <div className="flex text-[#7CE25B]">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                </div>
+                <span className="text-xs text-[#6B6860] font-medium">Verified Artisan</span>
               </div>
+
+              {/* Artisan credit */}
+              {product.artisan && (
+                <p className="text-sm text-[#6B6860] mb-4 flex items-center gap-1">
+                  <span>by <span className="font-semibold text-[#0B0B0F]">{product.artisan.name}</span></span>
+                  {product.artisan.state && (
+                    <span className="flex items-center gap-0.5">
+                      <MapPin className="w-3 h-3" />
+                      {product.artisan.state}
+                    </span>
+                  )}
+                </p>
+              )}
+
+              {/* Price */}
+              <p
+                style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
+                className="text-3xl text-[#0B0B0F] mb-5"
+              >
+                ₹{product.final_price}
+              </p>
+
+              {/* Description */}
+              {product.description && (
+                <p className="text-sm text-[#6B6860] leading-relaxed mb-6">{product.description}</p>
+              )}
+
+              {/* Spec chips */}
+              {(product.materials || product.color || tags.length > 0) && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {product.materials && (
+                    <span className="px-3 py-1 bg-[#F7F5F0] border border-[#E8E6E1] rounded-full text-xs font-medium text-[#0B0B0F]">
+                      {product.materials}
+                    </span>
+                  )}
+                  {product.color && (
+                    <span className="px-3 py-1 bg-[#F7F5F0] border border-[#E8E6E1] rounded-full text-xs font-medium text-[#0B0B0F]">
+                      {product.color}
+                    </span>
+                  )}
+                  {tags.map((tag: string) => (
+                    <span key={tag} className="px-3 py-1 bg-[#F7F5F0] border border-[#E8E6E1] rounded-full text-xs font-medium text-[#6B6860]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Production time */}
+              {product.production_time && (
+                <p className="text-xs text-[#6B6860] mb-6">
+                  <span className="font-semibold text-[#0B0B0F]">Production time:</span> {product.production_time}
+                </p>
+              )}
 
               {/* Quantity + CTA */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
-                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-3 text-gray-600 hover:bg-gray-50 font-bold text-lg">−</button>
-                  <span className="px-4 py-3 font-extrabold text-gray-900 border-x-2 border-gray-200 min-w-[3rem] text-center">{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-3 text-gray-600 hover:bg-gray-50 font-bold text-lg">+</button>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-auto">
+                {/* Quantity selector */}
+                <div className="flex items-center border border-[#E8E6E1] rounded-xl overflow-hidden bg-[#F7F5F0] flex-shrink-0">
+                  <button
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    className="px-4 py-3 text-[#0B0B0F] hover:bg-[#E8E6E1] transition font-bold"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span
+                    style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
+                    className="px-4 py-3 text-[#0B0B0F] border-x border-[#E8E6E1] min-w-[3rem] text-center text-sm"
+                  >
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(q => q + 1)}
+                    className="px-4 py-3 text-[#0B0B0F] hover:bg-[#E8E6E1] transition font-bold"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+
+                {/* Add to Cart */}
                 <button
                   onClick={addToCart}
                   disabled={adding}
-                  className={`flex-1 py-4 rounded-xl font-bold flex items-center justify-center transition-all shadow-lg ${added ? "bg-green-600 text-white shadow-green-600/25" : "bg-primary text-white hover:bg-secondary shadow-primary/25"}`}
+                  className={`flex-1 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                    added
+                      ? "bg-[#7CE25B] text-[#0B0B0F]"
+                      : "bg-[#7CE25B] text-[#0B0B0F] hover:brightness-95 disabled:opacity-60"
+                  }`}
+                  style={{ fontFamily: "Space Grotesk, sans-serif" }}
                 >
-                  {adding ? "Adding…" : added ? <><CheckCircle className="w-5 h-5 mr-2" />Added to Cart!</> : <><ShoppingCart className="w-5 h-5 mr-2" />Add to Cart</>}
+                  {adding ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-[#0B0B0F]/30 border-t-[#0B0B0F] rounded-full animate-spin" />
+                      Adding…
+                    </>
+                  ) : added ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Added to Cart!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-4 h-4" />
+                      Add to Cart
+                    </>
+                  )}
                 </button>
               </div>
 
-              {/* Artisan */}
+              {/* Artisan card */}
               {product.artisan && (
-                <div className="border-t border-gray-100 pt-6 flex items-center gap-4">
-                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary text-2xl font-extrabold flex-shrink-0">
+                <div className="mt-6 pt-6 border-t border-[#E8E6E1] flex items-center gap-4">
+                  <div
+                    style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
+                    className="w-12 h-12 bg-[#0B0B0F] text-white rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                  >
                     {product.artisan.name?.charAt(0) || "A"}
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Crafted by</p>
-                    <p className="font-extrabold text-gray-900 text-lg">{product.artisan.name}</p>
-                    {product.artisan.craft && <p className="text-sm text-primary font-medium">{product.artisan.craft}</p>}
+                    <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold mb-0.5">Crafted by</p>
+                    <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F]">
+                      {product.artisan.name}
+                    </p>
+                    {product.artisan.craft && (
+                      <p className="text-xs text-[#6B6860] mt-0.5">{product.artisan.craft}</p>
+                    )}
                     {product.artisan.state && (
-                      <p className="text-sm text-gray-500 flex items-center mt-1"><MapPin className="w-3.5 h-3.5 mr-1" />{product.artisan.state}</p>
+                      <p className="text-xs text-[#6B6860] flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3 h-3" />{product.artisan.state}
+                      </p>
                     )}
                   </div>
                 </div>

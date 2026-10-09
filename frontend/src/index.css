@@ -1,13 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #166534;
-  --color-secondary: #14532d;
-  --color-background: #fdfbf7;
+  --color-ink: #0B0B0F;
+  --color-paper: #F7F5F0;
+  --color-border: #E8E6E1;
+  --color-muted: #6B6860;
+  --color-lime: #7CE25B;
+  --color-magenta: #E6429B;
+  --color-cyan: #3FC7E9;
+  --color-primary: #0B0B0F;
+  --color-secondary: #6B6860;
+  --color-background: #F7F5F0;
 }
 
+* { box-sizing: border-box; }
+
 body {
-  background-color: var(--color-background);
-  color: #27272a;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #F7F5F0;
+  color: #0B0B0F;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+h1, h2, h3, h4, h5, h6, .display {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.gradient-border {
+  border-image: linear-gradient(135deg, #7CE25B, #3FC7E9, #E6429B) 1;
+}
+
+.prism-gradient {
+  background: linear-gradient(135deg, #7CE25B, #3FC7E9, #E6429B);
+}
+
+.prism-text {
+  background: linear-gradient(135deg, #7CE25B, #3FC7E9, #E6429B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.lime-glow { box-shadow: 0 0 20px rgba(124, 226, 91, 0.3); }
+.magenta-glow { box-shadow: 0 0 20px rgba(230, 66, 155, 0.3); }
+.cyan-glow { box-shadow: 0 0 20px rgba(63, 199, 233, 0.3); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E8E6E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6B6860; }
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

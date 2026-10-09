@@ -2,11 +2,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../AuthContext";
 import { apiCall } from "../../api";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, ArrowRight } from "lucide-react";
 
 export default function BuyerLogin() {
-  const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
-  const { login } = useAuth(); const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true); setError("");
@@ -15,35 +19,132 @@ export default function BuyerLogin() {
       if (res.role !== "buyer") { setError("This account is not a buyer account."); return; }
       login(res.access_token);
       navigate("/marketplace");
-    } catch (err: any) { setError(err.message || "Login failed"); } finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link to="/" className="text-2xl font-extrabold text-primary block text-center mb-8">KalaSaarthi</Link>
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-          <div className="flex items-center justify-center w-14 h-14 bg-blue-100 rounded-2xl mx-auto mb-6">
-            <ShoppingBag className="w-7 h-7 text-blue-600" />
+    <div className="min-h-screen bg-[#0B0B0F] flex flex-col">
+      {/* Prism top stripe */}
+      <div className="h-1 prism-gradient" />
+
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+
+          {/* Brand */}
+          <Link to="/" className="flex items-center justify-center mb-10 group">
+            <span
+              style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em", fontSize: "1.35rem" }}
+              className="text-white group-hover:opacity-80 transition-opacity"
+            >
+              KalaSaarthi
+            </span>
+          </Link>
+
+          <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-7 backdrop-blur-sm">
+
+            {/* Icon */}
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
+              style={{ background: "rgba(63,199,233,0.12)" }}
+            >
+              <ShoppingBag className="w-5 h-5" style={{ color: "#3FC7E9" }} />
+            </div>
+
+            {/* Heading */}
+            <h1
+              style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.025em" }}
+              className="text-xl text-white mb-1"
+            >
+              Buyer sign in
+            </h1>
+            <p className="text-white/40 text-sm mb-6" style={{ fontFamily: "Inter, sans-serif" }}>
+              Discover authentic Indian handicrafts
+            </p>
+
+            {error && (
+              <div className="bg-red-950/60 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-5 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#3FC7E9]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#3FC7E9]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 mt-1"
+                style={{ fontFamily: "Space Grotesk, sans-serif", background: "#3FC7E9", color: "#0B0B0F" }}
+              >
+                {loading ? (
+                  "Signing in…"
+                ) : (
+                  <>
+                    <span>Sign in</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-5 pt-5 border-t border-white/[0.08] space-y-1.5 text-center">
+              <p className="text-white/40 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+                New buyer?{" "}
+                <Link
+                  to="/buyer/register"
+                  className="text-white/70 hover:text-white font-semibold transition-colors"
+                >
+                  Create account
+                </Link>
+              </p>
+              <p className="text-white/20 text-xs" style={{ fontFamily: "Inter, sans-serif" }}>
+                Are you an artisan?{" "}
+                <Link
+                  to="/artisan/login"
+                  className="text-white/35 hover:text-white/60 transition-colors"
+                >
+                  Artisan sign in
+                </Link>
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-gray-900 text-center mb-1">Buyer Login</h1>
-          <p className="text-gray-500 text-center mb-8">Discover authentic Indian handicrafts</p>
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm font-medium">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-              <input type="email" required className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none transition" value={email} onChange={e => setEmail(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
-              <input type="password" required className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none transition" value={password} onChange={e => setPassword(e.target.value)} />
-            </div>
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 disabled:opacity-60">
-              {loading ? "Signing in..." : "Sign In as Buyer"}
-            </button>
-          </form>
-          <p className="text-center mt-6 text-gray-500 text-sm">New buyer? <Link to="/buyer/register" className="text-blue-600 font-bold hover:underline">Create account</Link></p>
-          <p className="text-center mt-2 text-gray-400 text-xs">Are you an artisan? <Link to="/artisan/login" className="text-gray-500 hover:underline">Artisan login</Link></p>
         </div>
       </div>
     </div>
