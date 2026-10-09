@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { apiCall } from "../../api";
 import { Trash2, ArrowRight, ArrowLeft, ShoppingCart, CreditCard, CheckCircle, Minus, Plus } from "lucide-react";
 
@@ -10,6 +12,7 @@ export default function Cart() {
   const [placing, setPlacing] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
+  const { t, formatCurrency } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => { apiCall("/cart").then(setItems).catch(console.error).finally(() => setLoading(false)); }, []);
@@ -32,7 +35,7 @@ export default function Cart() {
       setOrderId(res.order_id);
       setItems([]);
       setStep("success");
-    } catch (err: any) { alert("Order failed: " + err.message); }
+    } catch (err: any) { alert(t("common.error", "Order failed: ") + err.message); }
     finally { setPlacing(false); }
   };
 
@@ -40,17 +43,20 @@ export default function Cart() {
 
   const Header = () => (
     <header className="bg-white border-b border-[#E8E6E1] sticky top-0 z-30">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
         <Link
           to="/marketplace"
           style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
           className="text-[#0B0B0F] text-lg"
         >
-          KalaSaarthi
+          {t("brand.name", "KalaSaarthi")}
         </Link>
-        <Link to="/orders" className="text-sm font-medium text-[#6B6860] hover:text-[#0B0B0F] transition">
-          My Orders
-        </Link>
+        <div className="flex items-center gap-3">
+          <LanguageSelector variant="light" compact />
+          <Link to="/orders" className="text-sm font-medium text-[#6B6860] hover:text-[#0B0B0F] transition">
+            {t("nav.orders", "Orders")}
+          </Link>
+        </div>
       </div>
     </header>
   );
@@ -72,18 +78,18 @@ export default function Cart() {
           style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em" }}
           className="text-3xl text-[#0B0B0F] mb-3"
         >
-          Order Placed! 🎉
+          {t("cart.orderSuccess", "Order Confirmed!")} 🎉
         </h1>
-        <p className="text-[#6B6860] mb-2 text-sm">Thank you for supporting Indian artisans.</p>
+        <p className="text-[#6B6860] mb-2 text-sm">{t("cart.orderSuccessDesc", "Thank you! Your order has been placed directly with the craftsperson.")}</p>
         <p className="text-[#0B0B0F] font-semibold text-sm mb-8">
-          Order #{orderId} is confirmed. Estimated delivery in 5 days.
+          {t("cart.orderId", "Order Reference ID")}: #{orderId}
         </p>
         <Link
           to="/orders"
           style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
           className="bg-[#0B0B0F] text-white px-8 py-3.5 rounded-xl hover:bg-[#1a1a1f] inline-block transition text-sm"
         >
-          View My Orders
+          {t("cart.viewMyOrders", "View My Orders")}
         </Link>
       </div>
     </div>
@@ -105,10 +111,10 @@ export default function Cart() {
                 style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em" }}
                 className="text-2xl sm:text-3xl text-[#0B0B0F]"
               >
-                Your Cart
+                {t("cart.title", "Your Shopping Cart")}
               </h1>
               {items.length > 0 && (
-                <span className="text-sm text-[#6B6860] font-medium">({items.length} item{items.length !== 1 ? "s" : ""})</span>
+                <span className="text-sm text-[#6B6860] font-medium">({items.length})</span>
               )}
             </div>
 
@@ -121,17 +127,17 @@ export default function Cart() {
                   style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
                   className="text-xl text-[#0B0B0F] mb-2"
                 >
-                  Cart is empty
+                  {t("cart.empty", "Your cart is currently empty")}
                 </p>
                 <p className="text-sm text-[#6B6860] mb-6">
-                  Explore the marketplace and add some beautiful handicrafts.
+                  {t("cart.emptyDesc", "Explore our marketplace and support skilled artisans by adding authentic handcrafted products.")}
                 </p>
                 <Link
                   to="/marketplace"
                   style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
                   className="bg-[#0B0B0F] text-white px-6 py-3 rounded-xl hover:bg-[#1a1a1f] inline-block transition text-sm"
                 >
-                  Browse Marketplace
+                  {t("cart.startShopping", "Explore Marketplace")}
                 </Link>
               </div>
             ) : (
@@ -157,13 +163,13 @@ export default function Cart() {
                           {item.product?.name}
                         </h4>
                         <p className="text-xs text-[#6B6860] mt-0.5 truncate">
-                          by {item.product?.artisan?.name || "Artisan"}
+                          {t("market.by", "by")} {item.product?.artisan?.name || t("nav.artisanPortal", "Artisan")}
                         </p>
                         <p
                           style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
                           className="text-[#0B0B0F] text-sm mt-1"
                         >
-                          ₹{((item.product?.final_price || 0) * item.quantity).toLocaleString()}
+                          {formatCurrency((item.product?.final_price || 0) * item.quantity)}
                         </p>
                       </div>
 
@@ -173,6 +179,7 @@ export default function Cart() {
                           <button
                             onClick={() => updateQty(item.id, item.quantity - 1)}
                             className="px-2.5 py-2 text-[#0B0B0F] hover:bg-[#E8E6E1] transition"
+                            aria-label="Decrease quantity"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
@@ -185,6 +192,7 @@ export default function Cart() {
                           <button
                             onClick={() => updateQty(item.id, item.quantity + 1)}
                             className="px-2.5 py-2 text-[#0B0B0F] hover:bg-[#E8E6E1] transition"
+                            aria-label="Increase quantity"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -192,6 +200,7 @@ export default function Cart() {
                         <button
                           onClick={() => remove(item.id)}
                           className="p-2 text-[#6B6860] hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                          aria-label="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -207,29 +216,29 @@ export default function Cart() {
                       style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
                       className="text-[#0B0B0F] text-lg mb-5"
                     >
-                      Order Summary
+                      {t("cart.orderSummary", "Order Summary")}
                     </h3>
                     <div className="space-y-3 text-sm mb-5">
                       <div className="flex justify-between text-[#6B6860]">
-                        <span>Subtotal ({items.length} items)</span>
-                        <span>₹{total.toLocaleString()}</span>
+                        <span>{t("cart.subtotal", "Subtotal")} ({items.length})</span>
+                        <span>{formatCurrency(total)}</span>
                       </div>
                       <div className="flex justify-between text-[#6B6860]">
-                        <span>Delivery</span>
-                        <span className="text-[#7CE25B] font-semibold">Free</span>
+                        <span>{t("cart.delivery", "Delivery Fee")}</span>
+                        <span className="text-[#7CE25B] font-semibold">{t("cart.free", "FREE")}</span>
                       </div>
                       <div className="border-t border-[#E8E6E1] pt-3 flex justify-between text-[#0B0B0F]">
-                        <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}>Total</span>
-                        <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}>₹{total.toLocaleString()}</span>
+                        <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}>{t("cart.total", "Total Amount")}</span>
+                        <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}>{formatCurrency(total)}</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-[#6B6860] mb-4">Taxes included where applicable. You pay on delivery.</p>
+                    <p className="text-[10px] text-[#6B6860] mb-4">{t("cart.codNotice", "You will pay cash or UPI directly when your package is handed over.")}</p>
                     <button
                       onClick={() => setStep("checkout")}
                       style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
                       className="w-full bg-[#7CE25B] text-[#0B0B0F] py-3.5 rounded-xl hover:brightness-95 flex items-center justify-center gap-2 transition text-sm"
                     >
-                      Checkout <ArrowRight className="w-4 h-4" />
+                      {t("cart.proceedToCheckout", "Proceed to Checkout")} <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -251,13 +260,15 @@ export default function Cart() {
                 style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em" }}
                 className="text-2xl sm:text-3xl text-[#0B0B0F]"
               >
-                Delivery Details
+                {t("cart.checkoutTitle", "Delivery & Contact Details")}
               </h1>
             </div>
 
             <form onSubmit={placeOrder} className="bg-white rounded-2xl border border-[#E8E6E1] p-6 sm:p-8 space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-[#0B0B0F] uppercase tracking-wider mb-2">Full Name</label>
+                <label className="block text-xs font-semibold text-[#0B0B0F] uppercase tracking-wider mb-2">
+                  {t("cart.fullName", "Recipient Full Name")}
+                </label>
                 <input
                   required
                   type="text"
@@ -267,7 +278,9 @@ export default function Cart() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#0B0B0F] uppercase tracking-wider mb-2">Phone Number</label>
+                <label className="block text-xs font-semibold text-[#0B0B0F] uppercase tracking-wider mb-2">
+                  {t("cart.phone", "Contact Phone Number")}
+                </label>
                 <input
                   required
                   type="tel"
@@ -277,7 +290,9 @@ export default function Cart() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#0B0B0F] uppercase tracking-wider mb-2">Complete Address</label>
+                <label className="block text-xs font-semibold text-[#0B0B0F] uppercase tracking-wider mb-2">
+                  {t("cart.deliveryAddress", "Complete Shipping Address")}
+                </label>
                 <textarea
                   required
                   rows={4}
@@ -292,17 +307,17 @@ export default function Cart() {
                 <CreditCard className="w-6 h-6 text-[#6B6860] flex-shrink-0" />
                 <div>
                   <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-sm text-[#0B0B0F]">
-                    Cash on Delivery
+                    {t("cart.cod", "Cash on Delivery (Pay upon arrival)")}
                   </p>
-                  <p className="text-xs text-[#6B6860]">Pay directly to the artisan on delivery</p>
+                  <p className="text-xs text-[#6B6860]">{t("cart.codNotice", "You will pay cash or UPI directly when your package is handed over.")}</p>
                 </div>
               </div>
 
               {/* Order total */}
               <div className="flex justify-between items-center py-3 border-t border-[#E8E6E1]">
-                <span className="text-sm text-[#6B6860]">Order Total</span>
+                <span className="text-sm text-[#6B6860]">{t("cart.total", "Total Amount")}</span>
                 <span style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F]">
-                  ₹{total.toLocaleString()}
+                  {formatCurrency(total)}
                 </span>
               </div>
 
@@ -315,10 +330,10 @@ export default function Cart() {
                 {placing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-[#0B0B0F]/30 border-t-[#0B0B0F] rounded-full animate-spin" />
-                    Placing Order…
+                    {t("cart.placingOrder", "Placing Order…")}
                   </>
                 ) : (
-                  `Place Order · ₹${total.toLocaleString()}`
+                  `${t("cart.placeOrder", "Place Order")} · ${formatCurrency(total)}`
                 )}
               </button>
             </form>

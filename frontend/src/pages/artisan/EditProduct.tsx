@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, CheckCircle, UploadCloud, Image as ImageIcon, Loader } from "lucide-react";
 import { apiCall, uploadCall } from "../../api";
+import { useLanguage } from "../../i18n/LanguageContext";
 import ArtisanLayout from "../../components/ArtisanLayout";
 
 const CATEGORIES = ["Textiles", "Pottery", "Jewelry", "Woodwork", "Metalwork", "Painting", "Weaving", "Embroidery", "Leather", "Other"];
@@ -9,6 +10,7 @@ const CATEGORIES = ["Textiles", "Pottery", "Jewelry", "Woodwork", "Metalwork", "
 export default function EditProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,9 +49,9 @@ export default function EditProduct() {
         });
         if (p.images?.[0]?.url) setImgUrl(p.images[0].url);
       })
-      .catch(() => setError("Could not load product."))
+      .catch(() => setError(t("common.error", "Could not load product.")))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   const handleChange = (field: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
@@ -65,7 +67,7 @@ export default function EditProduct() {
       const res = await uploadCall(`/products/${id}/image`, fd);
       setImgUrl(res.url);
     } catch (err: any) {
-      setImgError(err.message || "Image upload failed.");
+      setImgError(err.message || t("common.error", "Image upload failed."));
     } finally {
       setImgUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -86,7 +88,7 @@ export default function EditProduct() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
-      setError(err.message || "Save failed.");
+      setError(err.message || t("common.error", "Save failed."));
     } finally {
       setSaving(false);
     }
@@ -110,18 +112,18 @@ export default function EditProduct() {
         {/* Back */}
         <button
           onClick={() => navigate("/artisan/products")}
-          className="mb-6 flex items-center gap-1.5 text-[#6B6860] hover:text-[#0B0B0F] transition text-sm font-medium"
+          className="mb-6 flex items-center gap-1.5 text-[#6B6860] hover:text-[#0B0B0F] transition text-sm font-medium cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" /> My Catalogue
+          <ArrowLeft className="w-4 h-4" /> {t("nav.catalogue", "My Catalogue")}
         </button>
 
         {/* Heading */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-[#0B0B0F]" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-            Edit Product
+            {t("editProduct.title", "Edit Product")}
           </h1>
           <p className="text-[#6B6860] text-sm mt-1">
-            Update details and save. Changes appear immediately once published.
+            {t("addProduct.publishNow", "Update details and save. Changes appear immediately once published.")}
           </p>
         </div>
 
@@ -135,7 +137,7 @@ export default function EditProduct() {
 
           {/* ── Image Section ── */}
           <div>
-            <label className={labelClass}>Product Image</label>
+            <label className={labelClass}>{t("addProduct.stepPhoto", "Product Image")}</label>
             <div className="flex items-start gap-5">
               {/* Thumbnail */}
               <div className="w-28 h-28 rounded-xl border border-[#E8E6E1] overflow-hidden bg-[#F7F5F0] flex items-center justify-center flex-shrink-0">
@@ -156,12 +158,12 @@ export default function EditProduct() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={imgUploading}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-[#E8E6E1] text-[#6B6860] hover:border-[#0B0B0F] hover:text-[#0B0B0F] transition text-sm font-medium disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-[#E8E6E1] text-[#6B6860] hover:border-[#0B0B0F] hover:text-[#0B0B0F] transition text-sm font-medium disabled:opacity-50 cursor-pointer"
                 >
                   {imgUploading ? <Loader className="w-4 h-4 animate-spin text-[#7CE25B]" /> : <UploadCloud className="w-4 h-4" />}
-                  {imgUploading ? "Uploading…" : imgUrl ? "Replace Image" : "Upload Image"}
+                  {imgUploading ? t("common.loading", "Uploading…") : imgUrl ? t("editProduct.replaceImage", "Replace Image") : t("addProduct.uploadPhoto", "Upload Image")}
                 </button>
-                <p className="text-xs text-[#6B6860] mt-2">JPEG, PNG, WebP, GIF · max 10 MB</p>
+                <p className="text-xs text-[#6B6860] mt-2">{t("addProduct.supportedFormats", "JPEG, PNG, WebP, GIF · max 10 MB")}</p>
                 {imgError && <p className="text-xs text-red-600 mt-1 font-medium">{imgError}</p>}
               </div>
             </div>
@@ -170,7 +172,7 @@ export default function EditProduct() {
           {/* ── Name & Category ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className={labelClass}>Product Name</label>
+              <label className={labelClass}>{t("addProduct.productName", "Product Name")}</label>
               <input
                 type="text"
                 className={inputClass}
@@ -180,7 +182,7 @@ export default function EditProduct() {
               />
             </div>
             <div>
-              <label className={labelClass}>Category</label>
+              <label className={labelClass}>{t("addProduct.category", "Category")}</label>
               <select
                 className={inputClass}
                 value={form.category}
@@ -196,7 +198,7 @@ export default function EditProduct() {
 
           {/* ── Description ── */}
           <div>
-            <label className={labelClass}>Description</label>
+            <label className={labelClass}>{t("addProduct.description", "Description")}</label>
             <textarea
               rows={4}
               className={`${inputClass} resize-none`}
@@ -209,7 +211,7 @@ export default function EditProduct() {
           {/* ── Materials & Color ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className={labelClass}>Materials</label>
+              <label className={labelClass}>{t("addProduct.materials", "Materials")}</label>
               <input
                 type="text"
                 className={inputClass}
@@ -219,7 +221,7 @@ export default function EditProduct() {
               />
             </div>
             <div>
-              <label className={labelClass}>Color</label>
+              <label className={labelClass}>{t("addProduct.color", "Color")}</label>
               <input
                 type="text"
                 className={inputClass}
@@ -233,7 +235,7 @@ export default function EditProduct() {
           {/* ── Production Time & Price ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className={labelClass}>Production Time</label>
+              <label className={labelClass}>{t("addProduct.productionTime", "Production Time")}</label>
               <input
                 type="text"
                 className={inputClass}
@@ -243,7 +245,7 @@ export default function EditProduct() {
               />
             </div>
             <div>
-              <label className={labelClass}>Price (₹)</label>
+              <label className={labelClass}>{t("addProduct.sellingPrice", "Price (₹)")}</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B6860] font-medium text-sm">₹</span>
                 <input
@@ -259,7 +261,7 @@ export default function EditProduct() {
 
           {/* ── Tags ── */}
           <div>
-            <label className={labelClass}>Tags</label>
+            <label className={labelClass}>{t("addProduct.tags", "Tags")}</label>
             <input
               type="text"
               className={inputClass}
@@ -267,7 +269,6 @@ export default function EditProduct() {
               value={form.tags}
               onChange={(e) => handleChange("tags", e.target.value)}
             />
-            <p className="text-xs text-[#6B6860] mt-1.5">Separate tags with commas</p>
           </div>
 
           {/* ── Published toggle ── */}
@@ -277,7 +278,7 @@ export default function EditProduct() {
             <button
               type="button"
               onClick={() => handleChange("is_published", !form.is_published)}
-              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
                 form.is_published ? "bg-[#7CE25B]" : "bg-[#E8E6E1]"
               }`}
             >
@@ -287,7 +288,7 @@ export default function EditProduct() {
             </button>
             <div>
               <p className="text-sm font-semibold text-[#0B0B0F]">
-                {form.is_published ? "Published" : "Draft"}
+                {form.is_published ? t("artisan.published", "Published") : t("artisan.draft", "Draft")}
               </p>
               <p className="text-xs text-[#6B6860]">
                 {form.is_published ? "Visible in the marketplace" : "Not yet visible to buyers"}
@@ -300,25 +301,25 @@ export default function EditProduct() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition text-sm ${
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition text-sm cursor-pointer ${
                 saved
                   ? "bg-[#7CE25B] text-[#0B0B0F]"
                   : "bg-[#0B0B0F] text-white hover:bg-[#1a1a1f]"
               } disabled:opacity-60`}
             >
               {saving ? (
-                <><Loader className="w-4 h-4 animate-spin" /> Saving…</>
+                <><Loader className="w-4 h-4 animate-spin" /> {t("common.saving", "Saving…")}</>
               ) : saved ? (
-                <><CheckCircle className="w-4 h-4" /> Saved!</>
+                <><CheckCircle className="w-4 h-4" /> {t("common.success", "Saved!")}</>
               ) : (
-                <><Save className="w-4 h-4" /> Save Changes</>
+                <><Save className="w-4 h-4" /> {t("common.save", "Save Changes")}</>
               )}
             </button>
             <button
               onClick={() => navigate("/artisan/products")}
-              className="px-5 py-3 rounded-xl font-semibold border border-[#E8E6E1] text-[#6B6860] hover:bg-[#F7F5F0] transition text-sm"
+              className="px-5 py-3 rounded-xl font-semibold border border-[#E8E6E1] text-[#6B6860] hover:bg-[#F7F5F0] transition text-sm cursor-pointer"
             >
-              Cancel
+              {t("common.cancel", "Cancel")}
             </button>
           </div>
         </div>

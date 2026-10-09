@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { apiCall } from "../../api";
 import { Palette, ArrowRight } from "lucide-react";
 
@@ -10,6 +12,7 @@ export default function ArtisanLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,11 +23,11 @@ export default function ArtisanLogin() {
         method: "POST",
         body: JSON.stringify({ email, password })
       });
-      if (res.role !== "artisan") { setError("This account is not an artisan account."); return; }
+      if (res.role !== "artisan") { setError(t("auth.invalidRole", "This account is not an artisan account.")); return; }
       login(res.access_token);
       navigate(res.onboarding_complete ? "/artisan/dashboard" : "/artisan/onboarding");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(err.message || t("common.error", "Login failed"));
     } finally {
       setLoading(false);
     }
@@ -35,6 +38,11 @@ export default function ArtisanLogin() {
       {/* Prism top stripe */}
       <div className="h-1 prism-gradient" />
 
+      {/* Top right language selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector variant="dark" compact={false} />
+      </div>
+
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
 
@@ -44,7 +52,7 @@ export default function ArtisanLogin() {
               style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em", fontSize: "1.35rem" }}
               className="text-white group-hover:opacity-80 transition-opacity"
             >
-              KalaSaarthi
+              {t("brand.name", "KalaSaarthi")}
             </span>
           </Link>
 
@@ -63,48 +71,40 @@ export default function ArtisanLogin() {
               style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.025em" }}
               className="text-xl text-white mb-1"
             >
-              Artisan sign in
+              {t("auth.artisanSignInTitle", "Artisan sign in")}
             </h1>
-            <p className="text-white/40 text-sm mb-6" style={{ fontFamily: "Inter, sans-serif" }}>
-              Welcome back, craftsperson
+            <p className="text-white/40 text-sm mb-6">
+              {t("auth.artisanSignInSub", "Welcome back, craftsperson")}
             </p>
 
             {error && (
-              <div className="bg-red-950/60 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-5 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+              <div className="bg-red-950/60 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-5 text-sm">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Email
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2">
+                  {t("auth.email", "Email Address")}
                 </label>
                 <input
                   type="email"
                   required
                   className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7CE25B]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
-                  style={{ fontFamily: "Inter, sans-serif" }}
                   placeholder="you@example.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                 />
               </div>
               <div>
-                <label
-                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Password
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2">
+                  {t("auth.password", "Password")}
                 </label>
                 <input
                   type="password"
                   required
                   className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7CE25B]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
-                  style={{ fontFamily: "Inter, sans-serif" }}
                   placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
@@ -114,14 +114,14 @@ export default function ArtisanLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 mt-1"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 mt-1 cursor-pointer"
                 style={{ fontFamily: "Space Grotesk, sans-serif", background: "#7CE25B", color: "#0B0B0F" }}
               >
                 {loading ? (
-                  "Signing in…"
+                  t("common.loading", "Signing in…")
                 ) : (
                   <>
-                    <span>Sign in</span>
+                    <span>{t("auth.signInButton", "Sign in")}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -129,22 +129,22 @@ export default function ArtisanLogin() {
             </form>
 
             <div className="mt-5 pt-5 border-t border-white/[0.08] space-y-1.5 text-center">
-              <p className="text-white/40 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
-                New artisan?{" "}
+              <p className="text-white/40 text-sm">
+                {t("auth.newArtisan", "New artisan?")}{" "}
                 <Link
                   to="/artisan/register"
                   className="text-white/70 hover:text-white font-semibold transition-colors"
                 >
-                  Create account
+                  {t("auth.signUpButton", "Create account")}
                 </Link>
               </p>
-              <p className="text-white/20 text-xs" style={{ fontFamily: "Inter, sans-serif" }}>
-                Buyer?{" "}
+              <p className="text-white/20 text-xs">
+                {t("auth.areYouBuyer", "Buyer?")}{" "}
                 <Link
                   to="/buyer/login"
                   className="text-white/35 hover:text-white/60 transition-colors"
                 >
-                  Buyer sign in
+                  {t("auth.buyerSignInTitle", "Buyer sign in")}
                 </Link>
               </p>
             </div>

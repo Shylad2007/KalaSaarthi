@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 // Public pages
 import Landing from "./pages/Landing";
@@ -31,7 +32,7 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="w-10 h-10 border-4 border-[#0B0B0F] border-t-[#7CE25B] rounded-full animate-spin" />
     </div>
   );
 
@@ -48,58 +49,60 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/artisan/login" element={<ArtisanLogin />} />
-          <Route path="/artisan/register" element={<ArtisanRegister />} />
-          <Route path="/buyer/login" element={<BuyerLogin />} />
-          <Route path="/buyer/register" element={<BuyerRegister />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/artisan/login" element={<ArtisanLogin />} />
+            <Route path="/artisan/register" element={<ArtisanRegister />} />
+            <Route path="/buyer/login" element={<BuyerLogin />} />
+            <Route path="/buyer/register" element={<BuyerRegister />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
 
-          {/* Artisan */}
-          <Route path="/artisan/onboarding" element={
-            <ProtectedRoute role="artisan"><ArtisanOnboarding /></ProtectedRoute>
-          } />
-          <Route path="/artisan/dashboard" element={
-            <ProtectedRoute role="artisan"><ArtisanDashboard /></ProtectedRoute>
-          } />
-          <Route path="/artisan/products" element={
-            <ProtectedRoute role="artisan"><ProductCatalogue /></ProtectedRoute>
-          } />
-          <Route path="/artisan/add-product" element={
-            <ProtectedRoute role="artisan"><AddProduct /></ProtectedRoute>
-          } />
-          <Route path="/artisan/edit-product/:id" element={
-            <ProtectedRoute role="artisan"><EditProduct /></ProtectedRoute>
-          } />
-          <Route path="/artisan/revival" element={
-            <ProtectedRoute role="artisan"><RevivalEngine /></ProtectedRoute>
-          } />
-          <Route path="/artisan/opportunities" element={
-            <ProtectedRoute role="artisan"><Opportunities /></ProtectedRoute>
-          } />
-          <Route path="/artisan/orders" element={
-            <ProtectedRoute role="artisan"><ArtisanOrders /></ProtectedRoute>
-          } />
-          <Route path="/artisan/profile" element={
-            <ProtectedRoute role="artisan"><ArtisanProfile /></ProtectedRoute>
-          } />
+            {/* Artisan */}
+            <Route path="/artisan/onboarding" element={
+              <ProtectedRoute role="artisan"><ArtisanOnboarding /></ProtectedRoute>
+            } />
+            <Route path="/artisan/dashboard" element={
+              <ProtectedRoute role="artisan"><ArtisanDashboard /></ProtectedRoute>
+            } />
+            <Route path="/artisan/products" element={
+              <ProtectedRoute role="artisan"><ProductCatalogue /></ProtectedRoute>
+            } />
+            <Route path="/artisan/add-product" element={
+              <ProtectedRoute role="artisan"><AddProduct /></ProtectedRoute>
+            } />
+            <Route path="/artisan/edit-product/:id" element={
+              <ProtectedRoute role="artisan"><EditProduct /></ProtectedRoute>
+            } />
+            <Route path="/artisan/revival" element={
+              <ProtectedRoute role="artisan"><RevivalEngine /></ProtectedRoute>
+            } />
+            <Route path="/artisan/opportunities" element={
+              <ProtectedRoute role="artisan"><Opportunities /></ProtectedRoute>
+            } />
+            <Route path="/artisan/orders" element={
+              <ProtectedRoute role="artisan"><ArtisanOrders /></ProtectedRoute>
+            } />
+            <Route path="/artisan/profile" element={
+              <ProtectedRoute role="artisan"><ArtisanProfile /></ProtectedRoute>
+            } />
 
-          {/* Buyer */}
-          <Route path="/cart" element={<ProtectedRoute role="buyer"><Cart /></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute role="buyer"><BuyerOrders /></ProtectedRoute>} />
+            {/* Buyer */}
+            <Route path="/cart" element={<ProtectedRoute role="buyer"><Cart /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute role="buyer"><BuyerOrders /></ProtectedRoute>} />
 
-          {/* Legacy redirects */}
-          <Route path="/login" element={<Navigate to="/artisan/login" />} />
-          <Route path="/register" element={<Navigate to="/artisan/register" />} />
-          <Route path="/dashboard" element={<Navigate to="/artisan/dashboard" />} />
-          <Route path="/add-product" element={<Navigate to="/artisan/add-product" />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            {/* Legacy redirects */}
+            <Route path="/login" element={<Navigate to="/artisan/login" />} />
+            <Route path="/register" element={<Navigate to="/artisan/register" />} />
+            <Route path="/dashboard" element={<Navigate to="/artisan/dashboard" />} />
+            <Route path="/add-product" element={<Navigate to="/artisan/add-product" />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

@@ -1,80 +1,89 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { apiCall } from "../../api";
 import { Package, Clock, Truck, CheckCircle, ArrowLeft, ShoppingBag } from "lucide-react";
-
-const STATUS_CONFIG: Record<string, { color: string; textColor: string; icon: any; step: number }> = {
-  Placed:    { color: "bg-[#3FC7E9]/10 border-[#3FC7E9]/30", textColor: "text-[#0B8FAA]", icon: Clock, step: 1 },
-  Confirmed: { color: "bg-[#7CE25B]/10 border-[#7CE25B]/30", textColor: "text-[#3a8a20]", icon: CheckCircle, step: 2 },
-  Preparing: { color: "bg-[#3FC7E9]/10 border-[#3FC7E9]/30", textColor: "text-[#0B8FAA]", icon: Package, step: 3 },
-  Shipped:   { color: "bg-[#E6429B]/10 border-[#E6429B]/30", textColor: "text-[#b02070]", icon: Truck, step: 4 },
-  Delivered: { color: "bg-[#0B0B0F]/8 border-[#0B0B0F]/20", textColor: "text-[#0B0B0F]", icon: CheckCircle, step: 5 },
-};
-const STEPS = ["Placed", "Confirmed", "Preparing", "Shipped", "Delivered"];
-
-function OrderProgress({ status }: { status: string }) {
-  const currentStep = STATUS_CONFIG[status]?.step || 1;
-  return (
-    <div className="flex items-center w-full">
-      {STEPS.map((s, i) => (
-        <div key={s} className="flex flex-col items-center flex-1 relative">
-          {/* Connector line */}
-          {i < STEPS.length - 1 && (
-            <div
-              className={`absolute h-0.5 top-3.5 left-1/2 w-full transition-colors ${
-                i + 1 < currentStep ? "bg-[#7CE25B]" : "bg-[#E8E6E1]"
-              }`}
-            />
-          )}
-          {/* Dot */}
-          <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center z-10 transition-colors ${
-              i + 1 <= currentStep
-                ? "bg-[#7CE25B] text-[#0B0B0F]"
-                : "bg-white border border-[#E8E6E1] text-[#6B6860]"
-            }`}
-          >
-            {i + 1 <= currentStep
-              ? <CheckCircle className="w-3.5 h-3.5" />
-              : <span className="text-[10px] font-bold">{i + 1}</span>
-            }
-          </div>
-          <span className={`text-[10px] mt-1.5 font-medium hidden sm:block ${
-            i + 1 <= currentStep ? "text-[#0B0B0F]" : "text-[#6B6860]"
-          }`}>
-            {s}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function BuyerOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t, formatCurrency, formatDate } = useLanguage();
+
+  const STATUS_CONFIG: Record<string, { color: string; textColor: string; icon: any; step: number; label: string }> = {
+    Placed:    { color: "bg-[#3FC7E9]/10 border-[#3FC7E9]/30", textColor: "text-[#0B8FAA]", icon: Clock, step: 1, label: t("orders.statusPlaced", "Placed") },
+    Confirmed: { color: "bg-[#7CE25B]/10 border-[#7CE25B]/30", textColor: "text-[#3a8a20]", icon: CheckCircle, step: 2, label: t("orders.statusConfirmed", "Confirmed") },
+    Preparing: { color: "bg-[#3FC7E9]/10 border-[#3FC7E9]/30", textColor: "text-[#0B8FAA]", icon: Package, step: 3, label: t("orders.statusPreparing", "Preparing") },
+    Shipped:   { color: "bg-[#E6429B]/10 border-[#E6429B]/30", textColor: "text-[#b02070]", icon: Truck, step: 4, label: t("orders.statusShipped", "Shipped") },
+    Delivered: { color: "bg-[#0B0B0F]/8 border-[#0B0B0F]/20", textColor: "text-[#0B0B0F]", icon: CheckCircle, step: 5, label: t("orders.statusDelivered", "Delivered") },
+  };
+  const STEPS = ["Placed", "Confirmed", "Preparing", "Shipped", "Delivered"];
 
   useEffect(() => { apiCall("/orders").then(setOrders).catch(console.error).finally(() => setLoading(false)); }, []);
+
+  const OrderProgress = ({ status }: { status: string }) => {
+    const currentStep = STATUS_CONFIG[status]?.step || 1;
+    return (
+      <div className="flex items-center w-full">
+        {STEPS.map((s, i) => {
+          const stepLabel = STATUS_CONFIG[s]?.label || s;
+          return (
+            <div key={s} className="flex flex-col items-center flex-1 relative">
+              {/* Connector line */}
+              {i < STEPS.length - 1 && (
+                <div
+                  className={`absolute h-0.5 top-3.5 left-1/2 w-full transition-colors ${
+                    i + 1 < currentStep ? "bg-[#7CE25B]" : "bg-[#E8E6E1]"
+                  }`}
+                />
+              )}
+              {/* Dot */}
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center z-10 transition-colors ${
+                  i + 1 <= currentStep
+                    ? "bg-[#7CE25B] text-[#0B0B0F]"
+                    : "bg-white border border-[#E8E6E1] text-[#6B6860]"
+                }`}
+              >
+                {i + 1 <= currentStep
+                  ? <CheckCircle className="w-3.5 h-3.5" />
+                  : <span className="text-[10px] font-bold">{i + 1}</span>
+                }
+              </div>
+              <span className={`text-[10px] mt-1.5 font-medium hidden sm:block ${
+                i + 1 <= currentStep ? "text-[#0B0B0F]" : "text-[#6B6860]"
+              }`}>
+                {stepLabel}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F5F0]">
       {/* Navbar */}
       <header className="bg-white border-b border-[#E8E6E1] sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <Link
             to="/marketplace"
             style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
             className="text-[#0B0B0F] text-lg"
           >
-            KalaSaarthi
+            {t("brand.name", "KalaSaarthi")}
           </Link>
-          <Link
-            to="/cart"
-            className="text-sm font-medium text-[#6B6860] hover:text-[#0B0B0F] transition flex items-center gap-1.5"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Cart
-          </Link>
+          <div className="flex items-center gap-3">
+            <LanguageSelector variant="light" compact />
+            <Link
+              to="/cart"
+              className="text-sm font-medium text-[#6B6860] hover:text-[#0B0B0F] transition flex items-center gap-1.5"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              {t("nav.cart", "Cart")}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -88,10 +97,10 @@ export default function BuyerOrders() {
             style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em" }}
             className="text-2xl sm:text-3xl text-[#0B0B0F]"
           >
-            My Orders
+            {t("orders.title", "Order History")}
           </h1>
           {orders.length > 0 && (
-            <span className="text-sm text-[#6B6860] font-medium">{orders.length} order{orders.length !== 1 ? "s" : ""}</span>
+            <span className="text-sm text-[#6B6860] font-medium">({orders.length})</span>
           )}
         </div>
 
@@ -108,15 +117,15 @@ export default function BuyerOrders() {
               style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
               className="text-xl text-[#0B0B0F] mb-2"
             >
-              No orders yet
+              {t("orders.empty", "No orders placed yet")}
             </p>
-            <p className="text-sm text-[#6B6860] mb-6">Start browsing and support Indian artisans.</p>
+            <p className="text-sm text-[#6B6860] mb-6">{t("orders.emptyDesc", "Once you order handcrafted products, you can monitor their fulfillment here.")}</p>
             <Link
               to="/marketplace"
               style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
               className="bg-[#0B0B0F] text-white px-6 py-3 rounded-xl hover:bg-[#1a1a1f] inline-block transition text-sm"
             >
-              Explore Marketplace
+              {t("cart.startShopping", "Explore Marketplace")}
             </Link>
           </div>
         ) : (
@@ -130,21 +139,21 @@ export default function BuyerOrders() {
                   <div className="px-5 sm:px-6 py-4 border-b border-[#E8E6E1] flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-5 flex-wrap">
                       <div>
-                        <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold">Order</p>
+                        <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold">{t("orders.orderNum", "Order #")}</p>
                         <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F] text-sm">
                           #{order.id}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold">Date</p>
+                        <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold">{t("orders.date", "Date")}</p>
                         <p className="text-sm font-medium text-[#0B0B0F]">
-                          {new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                          {formatDate(order.created_at)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold">Total</p>
+                        <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold">{t("cart.total", "Total")}</p>
                         <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F] text-sm">
-                          ₹{Number(order.total_amount).toLocaleString()}
+                          {formatCurrency(order.total_amount)}
                         </p>
                       </div>
                     </div>
@@ -154,13 +163,13 @@ export default function BuyerOrders() {
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${cfg.color} ${cfg.textColor}`}
                     >
                       <Icon className="w-3.5 h-3.5" />
-                      {order.status}
+                      {cfg.label}
                     </span>
                   </div>
 
                   {/* Progress tracker */}
                   <div className="px-5 sm:px-6 py-5 border-b border-[#E8E6E1]">
-                    <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold mb-4">Order Progress</p>
+                    <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold mb-4">{t("orders.status", "Order Progress")}</p>
                     <OrderProgress status={order.status} />
                   </div>
 
@@ -186,16 +195,12 @@ export default function BuyerOrders() {
                     {order.estimated_delivery && (
                       <div className="md:w-52 bg-[#7CE25B]/10 rounded-xl p-4 border border-[#7CE25B]/20 flex flex-col justify-center">
                         <Truck className="w-5 h-5 text-[#3a8a20] mb-2" />
-                        <p className="text-[10px] text-[#3a8a20] uppercase tracking-widest font-semibold">Estimated Delivery</p>
+                        <p className="text-[10px] text-[#3a8a20] uppercase tracking-widest font-semibold">{t("detail.estimatedDelivery", "Estimated Delivery")}</p>
                         <p
                           style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }}
                           className="text-[#0B0B0F] text-base mt-1"
                         >
-                          {new Date(order.estimated_delivery).toLocaleDateString("en-IN", {
-                            weekday: "short",
-                            day: "numeric",
-                            month: "short"
-                          })}
+                          {formatDate(order.estimated_delivery)}
                         </p>
                       </div>
                     )}

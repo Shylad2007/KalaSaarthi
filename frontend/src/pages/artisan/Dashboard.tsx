@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { apiCall } from "../../api";
 import ArtisanLayout from "../../components/ArtisanLayout";
 import { Package, ArrowRight, Zap, Plus, ShoppingBag, Eye } from "lucide-react";
 
 export default function ArtisanDashboard() {
   const { user } = useAuth();
+  const { t, formatCurrency } = useLanguage();
   const [products, setProducts] = useState<any[]>([]);
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [revival, setRevival] = useState<any[]>([]);
@@ -14,7 +16,7 @@ export default function ArtisanDashboard() {
   const [loading, setLoading] = useState(true);
 
   const profile = user?.profile;
-  const displayName = profile?.name?.split(" ")[0] || "Artisan";
+  const displayName = profile?.name?.split(" ")[0] || t("nav.artisanPortal", "Artisan");
 
   useEffect(() => {
     Promise.all([
@@ -35,7 +37,11 @@ export default function ArtisanDashboard() {
   const pendingOrders = orders.filter(o => o.status === "Placed").length;
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12
+    ? t("artisan.goodMorning", "Good morning")
+    : hour < 17
+    ? t("artisan.goodAfternoon", "Good afternoon")
+    : t("artisan.goodEvening", "Good evening");
 
   return (
     <ArtisanLayout>
@@ -67,7 +73,7 @@ export default function ArtisanDashboard() {
         <div className="bg-white border border-[#E8E6E1] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#7CE25B]" />
-            <span className="text-xs text-[#6B6860] font-medium">Total Products</span>
+            <span className="text-xs text-[#6B6860] font-medium">{t("artisan.statProducts", "Total Products")}</span>
           </div>
           <p className="text-3xl font-bold text-[#0B0B0F]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {loading ? "—" : products.length}
@@ -77,7 +83,7 @@ export default function ArtisanDashboard() {
         <div className="bg-white border border-[#E8E6E1] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#7CE25B]" />
-            <span className="text-xs text-[#6B6860] font-medium">Published</span>
+            <span className="text-xs text-[#6B6860] font-medium">{t("artisan.statPublished", "Published")}</span>
           </div>
           <p className="text-3xl font-bold text-[#0B0B0F]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {loading ? "—" : published}
@@ -87,7 +93,7 @@ export default function ArtisanDashboard() {
         <div className="bg-white border border-[#E8E6E1] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#6B6860]" />
-            <span className="text-xs text-[#6B6860] font-medium">Drafts</span>
+            <span className="text-xs text-[#6B6860] font-medium">{t("artisan.statDrafts", "Drafts")}</span>
           </div>
           <p className="text-3xl font-bold text-[#0B0B0F]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {loading ? "—" : drafts}
@@ -97,7 +103,7 @@ export default function ArtisanDashboard() {
         <div className="bg-white border border-[#E8E6E1] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#3FC7E9]" />
-            <span className="text-xs text-[#6B6860] font-medium">New Orders</span>
+            <span className="text-xs text-[#6B6860] font-medium">{t("artisan.statNewOrders", "New Orders")}</span>
           </div>
           <p className="text-3xl font-bold text-[#0B0B0F]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {loading ? "—" : pendingOrders}
@@ -116,15 +122,15 @@ export default function ArtisanDashboard() {
                   className="text-lg font-bold text-[#0B0B0F]"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
-                  Recent Products
+                  {t("artisan.recentProducts", "Recent Products")}
                 </h2>
-                <p className="text-xs text-[#6B6860] mt-0.5">Your latest catalogue entries</p>
+                <p className="text-xs text-[#6B6860] mt-0.5">{t("catalogue.title", "My Catalogue")}</p>
               </div>
               <Link
                 to="/artisan/products"
                 className="text-xs font-semibold text-[#6B6860] hover:text-[#0B0B0F] flex items-center gap-1 transition-colors"
               >
-                View all <ArrowRight className="w-3.5 h-3.5" />
+                {t("common.viewAll", "View all")} <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
@@ -147,14 +153,14 @@ export default function ArtisanDashboard() {
                   <Package className="w-6 h-6 text-[#6B6860]" />
                 </div>
                 <p className="font-semibold text-[#0B0B0F] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  No products yet
+                  {t("artisan.noProducts", "No products added yet")}
                 </p>
-                <p className="text-sm text-[#6B6860] mb-4">Start adding your handcrafted products</p>
+                <p className="text-sm text-[#6B6860] mb-4">{t("artisan.addFirstProduct", "Add your first product")}</p>
                 <Link
                   to="/artisan/add-product"
                   className="inline-flex items-center gap-2 bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl text-sm hover:brightness-95 transition"
                 >
-                  <Plus className="w-4 h-4" /> Add your first product
+                  <Plus className="w-4 h-4" /> {t("artisan.addFirstProduct", "Add your first product")}
                 </Link>
               </div>
             ) : (
@@ -181,7 +187,7 @@ export default function ArtisanDashboard() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {p.final_price && (
-                        <span className="text-sm font-bold text-[#0B0B0F]">₹{p.final_price}</span>
+                        <span className="text-sm font-bold text-[#0B0B0F]">{formatCurrency(p.final_price)}</span>
                       )}
                       <span
                         className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
@@ -190,13 +196,13 @@ export default function ArtisanDashboard() {
                             : "bg-[#E8E6E1] text-[#6B6860]"
                         }`}
                       >
-                        {p.is_published ? "Published" : "Draft"}
+                        {p.is_published ? t("artisan.published", "Published") : t("artisan.draft", "Draft")}
                       </span>
                       <Link
                         to={`/artisan/edit-product/${p.id}`}
                         className="text-[10px] font-semibold text-[#6B6860] hover:text-[#0B0B0F] opacity-0 group-hover:opacity-100 transition"
                       >
-                        Edit
+                        {t("common.edit", "Edit")}
                       </Link>
                     </div>
                   </div>
@@ -215,15 +221,15 @@ export default function ArtisanDashboard() {
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   >
                     <Zap className="w-4 h-4 text-[#7CE25B]" />
-                    Revival Alerts
+                    {t("artisan.revivalAlerts", "Revival Alerts")}
                   </h2>
-                  <p className="text-xs text-[#6B6860] mt-0.5">Products needing your attention</p>
+                  <p className="text-xs text-[#6B6860] mt-0.5">{t("revival.subtitle", "Products needing attention")}</p>
                 </div>
                 <Link
                   to="/artisan/revival"
                   className="text-xs font-semibold text-[#6B6860] hover:text-[#0B0B0F] flex items-center gap-1 transition-colors"
                 >
-                  View all <ArrowRight className="w-3.5 h-3.5" />
+                  {t("common.viewAll", "View all")} <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
               <div className="space-y-2">
@@ -238,7 +244,7 @@ export default function ArtisanDashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[#0B0B0F] text-sm truncate">{item.product.name || "Untitled"}</p>
                       <p className="text-xs text-amber-700 mt-0.5">
-                        Health score: {item.health.score}/100 · {item.health.label}
+                        {t("artisan.healthScore", "Health score")}: {item.health.score}/100 · {item.health.label}
                       </p>
                       {item.health.recommendations?.[0]?.text && (
                         <p className="text-xs text-[#6B6860] mt-0.5 truncate">{item.health.recommendations[0].text}</p>
@@ -262,27 +268,27 @@ export default function ArtisanDashboard() {
               className="text-lg font-bold text-[#0B0B0F] mb-1"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Quick Actions
+              {t("artisan.quickActions", "Quick Actions")}
             </h2>
-            <p className="text-xs text-[#6B6860] mb-5">Jump right in</p>
+            <p className="text-xs text-[#6B6860] mb-5">{t("landing.featuresSub", "Artisan Tools")}</p>
             <div className="space-y-3">
               <Link
                 to="/artisan/add-product"
                 className="flex items-center justify-center gap-2 w-full bg-[#7CE25B] text-[#0B0B0F] font-semibold py-3 rounded-xl text-sm hover:brightness-95 transition"
               >
-                <Plus className="w-4 h-4" /> Add New Product
+                <Plus className="w-4 h-4" /> {t("nav.addProduct", "Add Product")}
               </Link>
               <Link
                 to="/artisan/orders"
                 className="flex items-center justify-center gap-2 w-full border border-[#0B0B0F] text-[#0B0B0F] font-semibold py-3 rounded-xl text-sm hover:bg-[#0B0B0F] hover:text-white transition"
               >
-                <ShoppingBag className="w-4 h-4" /> View Orders
+                <ShoppingBag className="w-4 h-4" /> {t("nav.orders", "Orders")}
               </Link>
               <Link
                 to="/artisan/opportunities"
                 className="flex items-center justify-center gap-2 w-full border border-[#0B0B0F] text-[#0B0B0F] font-semibold py-3 rounded-xl text-sm hover:bg-[#0B0B0F] hover:text-white transition"
               >
-                <Eye className="w-4 h-4" /> Browse Opportunities
+                <Eye className="w-4 h-4" /> {t("nav.opportunities", "Opportunities")}
               </Link>
             </div>
           </div>
@@ -295,13 +301,13 @@ export default function ArtisanDashboard() {
                   className="text-lg font-bold text-[#0B0B0F]"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
-                  For You
+                  {t("artisan.forYou", "Recommended Schemes")}
                 </h2>
                 <Link
                   to="/artisan/opportunities"
                   className="text-xs font-semibold text-[#6B6860] hover:text-[#0B0B0F] transition-colors"
                 >
-                  All
+                  {t("common.viewAll", "All")}
                 </Link>
               </div>
               <div className="space-y-3">

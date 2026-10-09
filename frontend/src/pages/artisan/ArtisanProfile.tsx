@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { apiCall } from "../../api";
 import ArtisanLayout from "../../components/ArtisanLayout";
 import { Save, CheckCircle } from "lucide-react";
@@ -19,6 +20,7 @@ const STATES = [
 
 export default function ArtisanProfile() {
   const { user, refreshUser } = useAuth();
+  const { t } = useLanguage();
   const [form, setForm] = useState<any>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -37,7 +39,7 @@ export default function ArtisanProfile() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
-      alert("Save failed: " + err.message);
+      alert(t("common.error", "Save failed: ") + err.message);
     } finally {
       setSaving(false);
     }
@@ -78,7 +80,7 @@ export default function ArtisanProfile() {
               className="text-xl font-bold text-[#0B0B0F]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              {form.name || "Your Name"}
+              {form.name || t("profile.title", "Artisan Profile")}
             </h1>
             {form.craft && (
               <p className="text-sm text-[#6B6860] mt-0.5">{form.craft}</p>
@@ -97,7 +99,7 @@ export default function ArtisanProfile() {
         {/* Success notice */}
         {saved && (
           <div className="flex items-center gap-3 bg-[#7CE25B]/15 border border-[#7CE25B]/40 text-[#2a7a10] px-5 py-4 rounded-2xl mb-6 text-sm font-medium">
-            <CheckCircle className="w-5 h-5 flex-shrink-0" /> Profile saved successfully!
+            <CheckCircle className="w-5 h-5 flex-shrink-0" /> {t("profile.savedSuccess", "Profile updated successfully!")}
           </div>
         )}
 
@@ -109,11 +111,11 @@ export default function ArtisanProfile() {
               className="text-base font-bold text-[#0B0B0F] mb-5 pb-3 border-b border-[#E8E6E1]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Personal Information
+              {t("profile.personalInfo", "Personal Information")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Full Name" keyName="name" placeholder="Your name" />
-              <Field label="Phone Number" keyName="phone" type="tel" placeholder="+91 XXXXX XXXXX" />
+              <Field label={t("auth.fullName", "Full Name")} keyName="name" placeholder="Your name" />
+              <Field label={t("cart.phone", "Phone Number")} keyName="phone" type="tel" placeholder="+91 XXXXX XXXXX" />
               <div>
                 <label className="block text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-2">State</label>
                 <select
@@ -137,10 +139,12 @@ export default function ArtisanProfile() {
               className="text-base font-bold text-[#0B0B0F] mb-5 pb-3 border-b border-[#E8E6E1]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Craft Details
+              {t("profile.craftDetails", "Craft Details")}
             </h2>
             <div className="mb-5">
-              <label className="block text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-3">Type of Craft</label>
+              <label className="block text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-3">
+                {t("profile.craftType", "Type of Craft")}
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {CRAFTS.map(c => (
                   <button
@@ -159,9 +163,11 @@ export default function ArtisanProfile() {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Materials Used" keyName="materials" placeholder="e.g. Cotton, Silk, Bamboo" />
+              <Field label={t("addProduct.materials", "Materials Used")} keyName="materials" placeholder="e.g. Cotton, Silk, Bamboo" />
               <div>
-                <label className="block text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-2">Years of Experience</label>
+                <label className="block text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-2">
+                  {t("profile.experience", "Years of Experience")}
+                </label>
                 <input
                   type="number"
                   min={0}
@@ -171,7 +177,7 @@ export default function ArtisanProfile() {
                   onChange={e => update("experience_years", parseInt(e.target.value))}
                 />
               </div>
-              <Field label="Monthly Production Capacity" keyName="production_capacity" placeholder="e.g. 20 sarees/month" />
+              <Field label={t("profile.capacity", "Monthly Production Capacity")} keyName="production_capacity" placeholder="e.g. 20 sarees/month" />
             </div>
           </section>
 
@@ -181,7 +187,7 @@ export default function ArtisanProfile() {
               className="text-base font-bold text-[#0B0B0F] mb-5 pb-3 border-b border-[#E8E6E1]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Your Story
+              {t("profile.yourStory", "Your Story")}
             </h2>
             <div>
               <label className="block text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-2">Bio</label>
@@ -199,10 +205,10 @@ export default function ArtisanProfile() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full flex items-center justify-center gap-2 bg-[#7CE25B] text-[#0B0B0F] font-bold py-4 rounded-xl text-sm hover:brightness-95 disabled:opacity-60 transition"
+            className="w-full flex items-center justify-center gap-2 bg-[#7CE25B] text-[#0B0B0F] font-bold py-4 rounded-xl text-sm hover:brightness-95 disabled:opacity-60 transition cursor-pointer"
           >
             <Save className="w-5 h-5" />
-            {saving ? "Saving..." : "Save Profile"}
+            {saving ? t("common.saving", "Saving...") : t("common.save", "Save Profile")}
           </button>
         </div>
       </div>

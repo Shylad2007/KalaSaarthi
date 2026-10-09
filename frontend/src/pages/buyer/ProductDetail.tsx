@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { apiCall } from "../../api";
 import { ShoppingCart, ArrowLeft, MapPin, CheckCircle, Package, Star, Minus, Plus } from "lucide-react";
 
@@ -12,6 +14,7 @@ export default function ProductDetail() {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const { user } = useAuth();
+  const { t, formatCurrency } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,14 +23,14 @@ export default function ProductDetail() {
 
   const addToCart = async () => {
     if (!user) { navigate("/buyer/login"); return; }
-    if (user.role !== "buyer") { alert("Please sign in as a buyer to add items to cart."); return; }
+    if (user.role !== "buyer") { alert(t("common.error", "Please sign in as a buyer to add items to cart.")); return; }
     setAdding(true);
     try {
       await apiCall("/cart", { method: "POST", body: JSON.stringify({ product_id: product.id, quantity }) });
       setAdded(true);
       setTimeout(() => setAdded(false), 3000);
     } catch (err: any) {
-      alert("Could not add to cart: " + err.message);
+      alert(t("common.error", "Could not add to cart: ") + err.message);
     } finally {
       setAdding(false);
     }
@@ -43,41 +46,43 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-[#F7F5F0] flex flex-col items-center justify-center gap-3">
       <p className="text-5xl">🧶</p>
       <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-xl text-[#0B0B0F]">
-        Product not found
+        {t("market.noProducts", "Product not found")}
       </p>
       <Link to="/marketplace" className="text-sm text-[#6B6860] hover:text-[#0B0B0F] underline transition">
-        Back to Marketplace
+        {t("detail.backToMarket", "Back to Marketplace")}
       </Link>
     </div>
   );
 
-  const tags = product.tags ? product.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
+  const tags = product.tags ? product.tags.split(",").map((tStr: string) => tStr.trim()).filter(Boolean) : [];
 
   return (
     <div className="min-h-screen bg-[#F7F5F0]">
       {/* Navbar */}
       <header className="bg-white border-b border-[#E8E6E1] sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <Link
             to="/marketplace"
             className="flex items-center gap-1.5 text-sm font-medium text-[#6B6860] hover:text-[#0B0B0F] transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Marketplace</span>
+            <span>{t("detail.backToMarket", "Marketplace")}</span>
           </Link>
           <Link
             to="/"
             style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
             className="text-[#0B0B0F] text-lg"
           >
-            KalaSaarthi
+            {t("brand.name", "KalaSaarthi")}
           </Link>
-          {user?.role === "buyer" && (
-            <Link to="/cart" className="text-[#6B6860] hover:text-[#0B0B0F] transition p-1.5">
-              <ShoppingCart className="w-5 h-5" />
-            </Link>
-          )}
-          {!user?.role && <div className="w-8" />}
+          <div className="flex items-center gap-2.5">
+            <LanguageSelector variant="light" compact={false} />
+            {user?.role === "buyer" && (
+              <Link to="/cart" className="text-[#6B6860] hover:text-[#0B0B0F] transition p-1.5" title={t("nav.cart", "Cart")}>
+                <ShoppingCart className="w-5 h-5" />
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -99,8 +104,8 @@ export default function ProductDetail() {
               )}
               {/* Quality score badge */}
               {product.quality_score != null && (
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm border border-[#E8E6E1] rounded-xl px-3 py-1.5 shadow-sm">
-                  <p className="text-[10px] font-semibold text-[#6B6860] uppercase tracking-wider">Quality</p>
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm border border-[#E8E6E1] rounded-xl px-3 py-1.5 shadow-xs">
+                  <p className="text-[10px] font-semibold text-[#6B6860] uppercase tracking-wider">{t("detail.qualityScore", "Quality")}</p>
                   <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F] text-sm">
                     {product.quality_score}/10
                   </p>
@@ -125,20 +130,20 @@ export default function ProductDetail() {
                 {product.name}
               </h1>
 
-              {/* Stars */}
+              {/* Stars & Verified */}
               <div className="flex items-center gap-1.5 mb-3">
                 <div className="flex text-[#7CE25B]">
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
                 </div>
-                <span className="text-xs text-[#6B6860] font-medium">Verified Artisan</span>
+                <span className="text-xs text-[#6B6860] font-medium">{t("detail.verifiedArtisan", "Verified Artisan")}</span>
               </div>
 
               {/* Artisan credit */}
               {product.artisan && (
                 <p className="text-sm text-[#6B6860] mb-4 flex items-center gap-1">
-                  <span>by <span className="font-semibold text-[#0B0B0F]">{product.artisan.name}</span></span>
+                  <span>{t("market.by", "by")} <span className="font-semibold text-[#0B0B0F]">{product.artisan.name}</span></span>
                   {product.artisan.state && (
-                    <span className="flex items-center gap-0.5">
+                    <span className="flex items-center gap-0.5 ml-1">
                       <MapPin className="w-3 h-3" />
                       {product.artisan.state}
                     </span>
@@ -151,7 +156,7 @@ export default function ProductDetail() {
                 style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
                 className="text-3xl text-[#0B0B0F] mb-5"
               >
-                ₹{product.final_price}
+                {product.final_price ? formatCurrency(product.final_price) : "—"}
               </p>
 
               {/* Description */}
@@ -164,17 +169,17 @@ export default function ProductDetail() {
                 <div className="flex flex-wrap gap-2 mb-6">
                   {product.materials && (
                     <span className="px-3 py-1 bg-[#F7F5F0] border border-[#E8E6E1] rounded-full text-xs font-medium text-[#0B0B0F]">
-                      {product.materials}
+                      {t("detail.materials", "Materials")}: {product.materials}
                     </span>
                   )}
                   {product.color && (
                     <span className="px-3 py-1 bg-[#F7F5F0] border border-[#E8E6E1] rounded-full text-xs font-medium text-[#0B0B0F]">
-                      {product.color}
+                      {t("detail.color", "Color")}: {product.color}
                     </span>
                   )}
                   {tags.map((tag: string) => (
                     <span key={tag} className="px-3 py-1 bg-[#F7F5F0] border border-[#E8E6E1] rounded-full text-xs font-medium text-[#6B6860]">
-                      {tag}
+                      #{tag}
                     </span>
                   ))}
                 </div>
@@ -183,7 +188,7 @@ export default function ProductDetail() {
               {/* Production time */}
               {product.production_time && (
                 <p className="text-xs text-[#6B6860] mb-6">
-                  <span className="font-semibold text-[#0B0B0F]">Production time:</span> {product.production_time}
+                  <span className="font-semibold text-[#0B0B0F]">{t("detail.productionTime", "Crafting Time")}:</span> {product.production_time}
                 </p>
               )}
 
@@ -194,6 +199,7 @@ export default function ProductDetail() {
                   <button
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
                     className="px-4 py-3 text-[#0B0B0F] hover:bg-[#E8E6E1] transition font-bold"
+                    aria-label="Decrease quantity"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -206,6 +212,7 @@ export default function ProductDetail() {
                   <button
                     onClick={() => setQuantity(q => q + 1)}
                     className="px-4 py-3 text-[#0B0B0F] hover:bg-[#E8E6E1] transition font-bold"
+                    aria-label="Increase quantity"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -225,21 +232,26 @@ export default function ProductDetail() {
                   {adding ? (
                     <>
                       <div className="w-4 h-4 border-2 border-[#0B0B0F]/30 border-t-[#0B0B0F] rounded-full animate-spin" />
-                      Adding…
+                      {t("detail.addingToCart", "Adding…")}
                     </>
                   ) : added ? (
                     <>
                       <CheckCircle className="w-4 h-4" />
-                      Added to Cart!
+                      {t("detail.addedToCart", "Added to Cart!")}
                     </>
                   ) : (
                     <>
                       <ShoppingCart className="w-4 h-4" />
-                      Add to Cart
+                      {t("detail.addToCart", "Add to Cart")}
                     </>
                   )}
                 </button>
               </div>
+
+              {/* Delivery notice */}
+              <p className="text-[11px] text-[#6B6860] mt-3">
+                {t("detail.estimatedDelivery", "Estimated Delivery: 4-7 business days across India")}
+              </p>
 
               {/* Artisan card */}
               {product.artisan && (
@@ -251,7 +263,9 @@ export default function ProductDetail() {
                     {product.artisan.name?.charAt(0) || "A"}
                   </div>
                   <div>
-                    <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold mb-0.5">Crafted by</p>
+                    <p className="text-[10px] text-[#6B6860] uppercase tracking-widest font-semibold mb-0.5">
+                      {t("detail.aboutArtisan", "Meet the Artisan")}
+                    </p>
                     <p style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700 }} className="text-[#0B0B0F]">
                       {product.artisan.name}
                     </p>

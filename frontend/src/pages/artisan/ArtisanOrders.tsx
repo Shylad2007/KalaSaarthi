@@ -1,23 +1,25 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { apiCall } from "../../api";
 import ArtisanLayout from "../../components/ArtisanLayout";
 import { Package, MapPin, Clock, Phone, ChevronDown, Check } from "lucide-react";
-
-const STATUSES = ["Placed", "Confirmed", "Preparing", "Shipped", "Delivered"];
-
-const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  Placed:    { bg: "bg-[#3FC7E9]/20", text: "text-[#0e7a92]" },
-  Confirmed: { bg: "bg-[#7CE25B]/20", text: "text-[#2a7a10]" },
-  Preparing: { bg: "bg-amber-100",    text: "text-amber-800"  },
-  Shipped:   { bg: "bg-[#E6429B]/15", text: "text-[#a01565]"  },
-  Delivered: { bg: "bg-[#0B0B0F]",    text: "text-white"      },
-};
 
 export default function ArtisanOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingStatus, setPendingStatus] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState<Record<number, boolean>>({});
+  const { t, formatCurrency, formatDate } = useLanguage();
+
+  const STATUSES = ["Placed", "Confirmed", "Preparing", "Shipped", "Delivered"];
+
+  const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+    Placed:    { bg: "bg-[#3FC7E9]/20", text: "text-[#0e7a92]", label: t("orders.statusPlaced", "Placed") },
+    Confirmed: { bg: "bg-[#7CE25B]/20", text: "text-[#2a7a10]", label: t("orders.statusConfirmed", "Confirmed") },
+    Preparing: { bg: "bg-amber-100",    text: "text-amber-800",  label: t("orders.statusPreparing", "Preparing") },
+    Shipped:   { bg: "bg-[#E6429B]/15", text: "text-[#a01565]",  label: t("orders.statusShipped", "Shipped") },
+    Delivered: { bg: "bg-[#0B0B0F]",    text: "text-white",      label: t("orders.statusDelivered", "Delivered") },
+  };
 
   const load = () => apiCall("/artisan/orders").then(setOrders).catch(console.error).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
@@ -39,7 +41,7 @@ export default function ArtisanOrders() {
             className="text-2xl font-bold text-[#0B0B0F]"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Orders
+            {t("nav.orders", "Orders")}
           </h1>
           {!loading && (
             <span className="text-xs font-bold bg-[#0B0B0F] text-white px-2.5 py-1 rounded-full">
@@ -48,7 +50,7 @@ export default function ArtisanOrders() {
           )}
         </div>
         <p className="text-sm text-[#6B6860] mt-1">
-          {orders.filter(o => o.status === "Placed").length} new · manage all your buyer orders here
+          {orders.filter(o => o.status === "Placed").length} {t("orders.statusPlaced", "new")} · {t("orders.subtitle", "manage all your buyer orders here")}
         </p>
       </div>
 
@@ -76,14 +78,14 @@ export default function ArtisanOrders() {
             className="text-lg font-bold text-[#0B0B0F] mb-2"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            No orders yet
+            {t("orders.empty", "No orders yet")}
           </h3>
-          <p className="text-sm text-[#6B6860]">When buyers purchase your products, they'll appear here.</p>
+          <p className="text-sm text-[#6B6860]">{t("orders.emptyDesc", "When buyers purchase your products, they'll appear here.")}</p>
         </div>
       ) : (
         <div className="space-y-5">
           {orders.map(order => {
-            const style = STATUS_STYLES[order.status] || { bg: "bg-[#E8E6E1]", text: "text-[#6B6860]" };
+            const style = STATUS_STYLES[order.status] || { bg: "bg-[#E8E6E1]", text: "text-[#6B6860]", label: order.status };
             const selected = pendingStatus[order.id] ?? order.status;
             return (
               <div key={order.id} className="bg-white border border-[#E8E6E1] rounded-2xl overflow-hidden">
@@ -91,7 +93,7 @@ export default function ArtisanOrders() {
                 <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-[#E8E6E1]">
                   <div className="flex items-center gap-5">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B6860]">Order</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B6860]">{t("orders.orderNum", "Order")}</p>
                       <p
                         className="font-bold text-[#0B0B0F] text-sm"
                         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
@@ -100,10 +102,10 @@ export default function ArtisanOrders() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B6860]">Date</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#6B6860]">{t("orders.date", "Date")}</p>
                       <p className="font-semibold text-[#0B0B0F] text-sm flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5 text-[#6B6860]" />
-                        {new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                        {formatDate(order.created_at)}
                       </p>
                     </div>
                     <div>
@@ -113,7 +115,7 @@ export default function ArtisanOrders() {
                   </div>
                   {/* Status badge */}
                   <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full ${style.bg} ${style.text}`}>
-                    {order.status}
+                    {style.label}
                   </span>
                 </div>
 
@@ -136,7 +138,7 @@ export default function ArtisanOrders() {
                           </div>
                           {item.price && (
                             <span className="text-sm font-bold text-[#0B0B0F]">
-                              ₹{(item.price * item.quantity).toFixed(0)}
+                              {formatCurrency(item.price * item.quantity)}
                             </span>
                           )}
                         </div>
@@ -170,17 +172,21 @@ export default function ArtisanOrders() {
                             onChange={e => setPendingStatus(prev => ({ ...prev, [order.id]: e.target.value }))}
                             className="w-full appearance-none bg-white border border-[#E8E6E1] rounded-xl px-3 pr-8 py-2.5 text-sm font-semibold text-[#0B0B0F] focus:outline-none focus:border-[#0B0B0F] transition cursor-pointer"
                           >
-                            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                            {STATUSES.map(s => (
+                              <option key={s} value={s}>
+                                {STATUS_STYLES[s]?.label || s}
+                              </option>
+                            ))}
                           </select>
                           <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B6860]" />
                         </div>
                         <button
                           onClick={() => updateStatus(order.id, selected)}
                           disabled={saving[order.id] || selected === order.status}
-                          className="flex items-center gap-1.5 bg-[#0B0B0F] text-white font-semibold px-4 py-2.5 rounded-xl text-sm disabled:opacity-40 hover:opacity-90 transition"
+                          className="flex items-center gap-1.5 bg-[#0B0B0F] text-white font-semibold px-4 py-2.5 rounded-xl text-sm disabled:opacity-40 hover:opacity-90 transition cursor-pointer"
                         >
                           <Check className="w-4 h-4" />
-                          {saving[order.id] ? "..." : "Save"}
+                          {saving[order.id] ? "..." : t("common.save", "Save")}
                         </button>
                       </div>
                     </div>

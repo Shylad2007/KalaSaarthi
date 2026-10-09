@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { apiCall } from "../../api";
 import ArtisanLayout from "../../components/ArtisanLayout";
 import { ExternalLink, CheckCircle } from "lucide-react";
@@ -19,15 +20,16 @@ function matchLevel(score: number): "high" | "medium" | "low" {
   return "low";
 }
 
-const MATCH_CONFIG = {
-  high:   { border: "border-l-[#7CE25B]", badge: "bg-[#7CE25B]/20 text-[#2a7a10]", label: "High Match" },
-  medium: { border: "border-l-[#3FC7E9]", badge: "bg-[#3FC7E9]/20 text-[#0e7a92]", label: "Medium Match" },
-  low:    { border: "border-l-[#6B6860]", badge: "bg-[#E8E6E1] text-[#6B6860]",    label: "Low Match" },
-};
-
 export default function Opportunities() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
+
+  const MATCH_CONFIG = {
+    high:   { border: "border-l-[#7CE25B]", badge: "bg-[#7CE25B]/20 text-[#2a7a10]", label: t("opp.highMatch", "High Match") },
+    medium: { border: "border-l-[#3FC7E9]", badge: "bg-[#3FC7E9]/20 text-[#0e7a92]", label: t("opp.mediumMatch", "Medium Match") },
+    low:    { border: "border-l-[#6B6860]", badge: "bg-[#E8E6E1] text-[#6B6860]",    label: t("opp.lowMatch", "General Scheme") },
+  };
 
   useEffect(() => {
     apiCall("/opportunities").then(setOpportunities).catch(console.error).finally(() => setLoading(false));
@@ -77,7 +79,7 @@ export default function Opportunities() {
         {/* Benefits */}
         {opp.benefits?.length > 0 && (
           <div className="mb-4">
-            <p className="text-[10px] font-bold text-[#6B6860] uppercase tracking-wider mb-2">Key Benefits</p>
+            <p className="text-[10px] font-bold text-[#6B6860] uppercase tracking-wider mb-2">{t("opp.keyBenefits", "Key Benefits")}</p>
             <ul className="space-y-1">
               {opp.benefits.map((b: string, i: number) => (
                 <li key={i} className="text-sm text-[#0B0B0F] flex items-start gap-2">
@@ -91,14 +93,14 @@ export default function Opportunities() {
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-[#E8E6E1]">
-          <p className="text-[10px] text-[#6B6860]">Source: {opp.source}</p>
+          <p className="text-[10px] text-[#6B6860]">{t("opp.source", "Source")}: {opp.source}</p>
           <a
             href={opp.url}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 text-sm font-bold text-[#0B0B0F] hover:text-[#7CE25B] transition-colors"
           >
-            Learn more <ExternalLink className="w-3.5 h-3.5" />
+            {t("opp.learnMore", "Learn more / Apply")} <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
       </div>
@@ -113,9 +115,9 @@ export default function Opportunities() {
           className="text-2xl font-bold text-[#0B0B0F]"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          Opportunities
+          {t("opp.title", "Opportunities")}
         </h1>
-        <p className="text-sm text-[#6B6860] mt-1">Govt. schemes &amp; funding for artisans</p>
+        <p className="text-sm text-[#6B6860] mt-1">{t("opp.subtitle", "Govt. schemes & funding for artisans")}</p>
         <div
           className="mt-3 h-[3px] w-20 rounded-full"
           style={{ background: "linear-gradient(90deg, #7CE25B, #3FC7E9, #E6429B)" }}
@@ -146,7 +148,7 @@ export default function Opportunities() {
                 className="text-lg font-bold text-[#0B0B0F] mb-4"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                Recommended For You
+                {t("opp.recommended", "Recommended For You")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {recommended.map(o => <OppCard key={o.id} opp={o} />)}
@@ -159,7 +161,7 @@ export default function Opportunities() {
                 className="text-lg font-bold text-[#0B0B0F] mb-4"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                All Opportunities
+                {t("opp.all", "All Opportunities")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {others.map(o => <OppCard key={o.id} opp={o} />)}

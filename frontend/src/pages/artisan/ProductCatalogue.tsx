@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { apiCall } from "../../api";
 import ArtisanLayout from "../../components/ArtisanLayout";
 import { Plus, Package, Edit, Eye, EyeOff, Activity } from "lucide-react";
@@ -10,6 +11,7 @@ export default function ProductCatalogue() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
+  const { t, formatCurrency } = useLanguage();
 
   useEffect(() => {
     apiCall("/products/my").then(setProducts).catch(console.error).finally(() => setLoading(false));
@@ -35,9 +37,9 @@ export default function ProductCatalogue() {
     : products;
 
   const tabs: { key: Filter; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "published", label: "Published" },
-    { key: "drafts", label: "Drafts" },
+    { key: "all", label: t("catalogue.filterAll", "All") },
+    { key: "published", label: t("catalogue.filterPublished", "Published") },
+    { key: "drafts", label: t("catalogue.filterDrafts", "Drafts") },
   ];
 
   return (
@@ -50,40 +52,40 @@ export default function ProductCatalogue() {
               className="text-2xl font-bold text-[#0B0B0F]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              My Catalogue
+              {t("catalogue.title", "My Catalogue")}
             </h1>
             <span className="text-xs font-bold bg-[#0B0B0F] text-white px-2.5 py-1 rounded-full">
               {products.length}
             </span>
           </div>
           <p className="text-sm text-[#6B6860] mt-1">
-            {products.filter(p => p.is_published).length} published · {products.filter(p => !p.is_published).length} drafts
+            {products.filter(p => p.is_published).length} {t("artisan.statPublished", "published")} · {products.filter(p => !p.is_published).length} {t("artisan.statDrafts", "drafts")}
           </p>
         </div>
         <Link
           to="/artisan/add-product"
           className="flex items-center gap-2 bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl text-sm hover:brightness-95 transition"
         >
-          <Plus className="w-4 h-4" /> Add Product
+          <Plus className="w-4 h-4" /> {t("nav.addProduct", "Add Product")}
         </Link>
       </div>
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6">
-        {tabs.map(t => (
+        {tabs.map(tTab => (
           <button
-            key={t.key}
-            onClick={() => setFilter(t.key)}
+            key={tTab.key}
+            onClick={() => setFilter(tTab.key)}
             className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
-              filter === t.key
+              filter === tTab.key
                 ? "bg-[#0B0B0F] text-white"
                 : "bg-white border border-[#E8E6E1] text-[#6B6860] hover:border-[#0B0B0F] hover:text-[#0B0B0F]"
             }`}
           >
-            {t.label}
-            {t.key !== "all" && (
-              <span className={`ml-1.5 text-xs ${filter === t.key ? "opacity-70" : "opacity-50"}`}>
-                {t.key === "published" ? products.filter(p => p.is_published).length : products.filter(p => !p.is_published).length}
+            {tTab.label}
+            {tTab.key !== "all" && (
+              <span className={`ml-1.5 text-xs ${filter === tTab.key ? "opacity-70" : "opacity-50"}`}>
+                {tTab.key === "published" ? products.filter(p => p.is_published).length : products.filter(p => !p.is_published).length}
               </span>
             )}
           </button>
@@ -113,17 +115,17 @@ export default function ProductCatalogue() {
             className="text-lg font-bold text-[#0B0B0F] mb-2"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            {filter === "all" ? "No products yet" : filter === "published" ? "No published products" : "No draft products"}
+            {filter === "all" ? t("artisan.noProducts", "No products yet") : filter === "published" ? "No published products" : "No draft products"}
           </h3>
           <p className="text-sm text-[#6B6860] mb-6">
-            {filter === "all" ? "Add your first product to start selling." : filter === "published" ? "Publish a product to see it here." : "Save a draft to see it here."}
+            {filter === "all" ? t("artisan.addFirstProduct", "Add your first product to start selling.") : filter === "published" ? "Publish a product to see it here." : "Save a draft to see it here."}
           </p>
           {filter === "all" && (
             <Link
               to="/artisan/add-product"
               className="inline-flex items-center gap-2 bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl text-sm hover:brightness-95 transition"
             >
-              <Plus className="w-4 h-4" /> Add First Product
+              <Plus className="w-4 h-4" /> {t("artisan.addFirstProduct", "Add First Product")}
             </Link>
           )}
         </div>
@@ -155,7 +157,7 @@ export default function ProductCatalogue() {
                       : "bg-white/90 text-[#6B6860] border border-[#E8E6E1]"
                   }`}
                 >
-                  {p.is_published ? "Published" : "Draft"}
+                  {p.is_published ? t("artisan.published", "Published") : t("artisan.draft", "Draft")}
                 </span>
               </div>
 
@@ -172,7 +174,7 @@ export default function ProductCatalogue() {
                     {p.category || "Uncategorized"}
                   </span>
                   {p.final_price && (
-                    <span className="text-sm font-bold text-[#0B0B0F]">₹{p.final_price}</span>
+                    <span className="text-sm font-bold text-[#0B0B0F]">{formatCurrency(p.final_price)}</span>
                   )}
                 </div>
 
@@ -180,7 +182,7 @@ export default function ProductCatalogue() {
                   <div className="flex items-center text-xs mb-3 gap-1">
                     <Activity className={`w-3.5 h-3.5 ${healthColor(p.image_quality_score)}`} />
                     <span className={`font-medium ${healthColor(p.image_quality_score)}`}>
-                      Image score: {p.image_quality_score}/100
+                      {t("detail.qualityScore", "Image score")}: {p.image_quality_score}/100
                     </span>
                   </div>
                 )}
@@ -190,7 +192,7 @@ export default function ProductCatalogue() {
                     to={`/artisan/edit-product/${p.id}`}
                     className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-[#F7F5F0] text-[#0B0B0F] hover:bg-[#E8E6E1] transition"
                   >
-                    <Edit className="w-3.5 h-3.5" /> Edit
+                    <Edit className="w-3.5 h-3.5" /> {t("common.edit", "Edit")}
                   </Link>
                   <button
                     onClick={() => togglePublish(p)}
@@ -201,9 +203,9 @@ export default function ProductCatalogue() {
                     }`}
                   >
                     {p.is_published ? (
-                      <><EyeOff className="w-3.5 h-3.5" /> Unpublish</>
+                      <><EyeOff className="w-3.5 h-3.5" /> {t("artisan.unpublish", "Unpublish")}</>
                     ) : (
-                      <><Eye className="w-3.5 h-3.5" /> Publish</>
+                      <><Eye className="w-3.5 h-3.5" /> {t("artisan.publish", "Publish")}</>
                     )}
                   </button>
                 </div>

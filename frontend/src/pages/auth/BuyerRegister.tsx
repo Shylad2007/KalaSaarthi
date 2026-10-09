@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { apiCall } from "../../api";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 
@@ -10,6 +12,7 @@ export default function BuyerRegister() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const update = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -18,7 +21,7 @@ export default function BuyerRegister() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("auth.passwordsDoNotMatch", "Passwords do not match."));
       return;
     }
     setLoading(true); setError("");
@@ -28,7 +31,7 @@ export default function BuyerRegister() {
       login(res.access_token);
       navigate("/marketplace");
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      setError(err.message || t("common.error", "Registration failed"));
     } finally {
       setLoading(false);
     }
@@ -39,6 +42,11 @@ export default function BuyerRegister() {
       {/* Prism top stripe */}
       <div className="h-1 prism-gradient" />
 
+      {/* Top right language selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector variant="dark" compact={false} />
+      </div>
+
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
 
@@ -48,7 +56,7 @@ export default function BuyerRegister() {
               style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.03em", fontSize: "1.35rem" }}
               className="text-white group-hover:opacity-80 transition-opacity"
             >
-              KalaSaarthi
+              {t("brand.name", "KalaSaarthi")}
             </span>
           </Link>
 
@@ -67,84 +75,69 @@ export default function BuyerRegister() {
               style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, letterSpacing: "-0.025em" }}
               className="text-xl text-white mb-1"
             >
-              Create buyer account
+              {t("auth.buyerSignUpTitle", "Create buyer account")}
             </h1>
-            <p className="text-white/40 text-sm mb-6" style={{ fontFamily: "Inter, sans-serif" }}>
-              Find and support authentic Indian artisans
+            <p className="text-white/40 text-sm mb-6">
+              {t("auth.buyerSignUpSub", "Join to support verified traditional artisans")}
             </p>
 
             {error && (
-              <div className="bg-red-950/60 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-5 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+              <div className="bg-red-950/60 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-5 text-sm">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Full Name
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2">
+                  {t("auth.fullName", "Full Name")}
                 </label>
                 <input
                   type="text"
                   required
                   className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#3FC7E9]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                  placeholder="Arjun Mehta"
+                  placeholder="Pooja Sharma"
                   value={form.name}
                   onChange={update("name")}
                 />
               </div>
+
               <div>
-                <label
-                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Email
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2">
+                  {t("auth.email", "Email Address")}
                 </label>
                 <input
                   type="email"
                   required
                   className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#3FC7E9]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
-                  style={{ fontFamily: "Inter, sans-serif" }}
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={update("email")}
                 />
               </div>
+
               <div>
-                <label
-                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Password
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2">
+                  {t("auth.password", "Password")}
                 </label>
                 <input
                   type="password"
                   required
-                  minLength={6}
                   className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#3FC7E9]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
-                  style={{ fontFamily: "Inter, sans-serif" }}
                   placeholder="••••••••"
                   value={form.password}
                   onChange={update("password")}
                 />
               </div>
+
               <div>
-                <label
-                  className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Confirm Password
+                <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-[0.1em] mb-2">
+                  {t("auth.confirmPassword", "Confirm Password")}
                 </label>
                 <input
                   type="password"
                   required
-                  minLength={6}
                   className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#3FC7E9]/60 focus:bg-white/[0.07] transition-all placeholder-white/20"
-                  style={{ fontFamily: "Inter, sans-serif" }}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
@@ -154,14 +147,14 @@ export default function BuyerRegister() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 mt-1"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 mt-1 cursor-pointer"
                 style={{ fontFamily: "Space Grotesk, sans-serif", background: "#3FC7E9", color: "#0B0B0F" }}
               >
                 {loading ? (
-                  "Creating account…"
+                  t("common.loading", "Creating account…")
                 ) : (
                   <>
-                    <span>Create account</span>
+                    <span>{t("auth.signUpButton", "Create Account")}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -169,22 +162,22 @@ export default function BuyerRegister() {
             </form>
 
             <div className="mt-5 pt-5 border-t border-white/[0.08] space-y-1.5 text-center">
-              <p className="text-white/40 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
-                Already registered?{" "}
+              <p className="text-white/40 text-sm">
+                {t("auth.alreadyHaveAccount", "Already have an account?")}{" "}
                 <Link
                   to="/buyer/login"
                   className="text-white/70 hover:text-white font-semibold transition-colors"
                 >
-                  Sign in
+                  {t("auth.signInButton", "Sign in")}
                 </Link>
               </p>
-              <p className="text-white/20 text-xs" style={{ fontFamily: "Inter, sans-serif" }}>
-                Are you an artisan?{" "}
+              <p className="text-white/20 text-xs">
+                {t("auth.areYouArtisan", "Artisan?")}{" "}
                 <Link
                   to="/artisan/register"
                   className="text-white/35 hover:text-white/60 transition-colors"
                 >
-                  Artisan sign up
+                  {t("auth.artisanSignUpTitle", "Artisan registration")}
                 </Link>
               </p>
             </div>

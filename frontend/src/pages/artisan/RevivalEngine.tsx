@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { apiCall } from "../../api";
 import ArtisanLayout from "../../components/ArtisanLayout";
 import { Zap, CheckCircle, Camera, FileText, DollarSign, Info, Package } from "lucide-react";
@@ -11,10 +12,10 @@ const ICON_MAP: Record<string, any> = {
 };
 
 function healthConfig(score: number) {
-  if (score >= 80) return { color: "#7CE25B", bg: "bg-[#7CE25B]/15", text: "text-[#2a7a10]", ring: "#7CE25B" };
-  if (score >= 60) return { color: "#3FC7E9", bg: "bg-[#3FC7E9]/15", text: "text-[#0e7a92]", ring: "#3FC7E9" };
-  if (score >= 40) return { color: "#F59E0B", bg: "bg-amber-50",     text: "text-amber-700",  ring: "#F59E0B" };
-  return              { color: "#EF4444", bg: "bg-red-50",        text: "text-red-700",    ring: "#EF4444" };
+  if (score >= 80) return { color: "#7CE25B", bg: "bg-[#7CE25B]/15", text: "text-[#2a7a10]" };
+  if (score >= 60) return { color: "#3FC7E9", bg: "bg-[#3FC7E9]/15", text: "text-[#0e7a92]" };
+  if (score >= 40) return { color: "#F59E0B", bg: "bg-amber-50",     text: "text-amber-700" };
+  return              { color: "#EF4444", bg: "bg-red-50",        text: "text-red-700" };
 }
 
 function HealthBadge({ score }: { score: number }) {
@@ -48,6 +49,7 @@ function HealthBadge({ score }: { score: number }) {
 export default function RevivalEngine() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     apiCall("/artisan/revival").then(setItems).catch(console.error).finally(() => setLoading(false));
@@ -66,11 +68,11 @@ export default function RevivalEngine() {
               className="text-2xl font-bold text-[#0B0B0F]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Revival Engine
+              {t("revival.title", "Product Revival Engine")}
             </h1>
           </div>
         </div>
-        <p className="text-sm text-[#6B6860] mt-2 ml-0">Products needing attention — improve them to boost visibility.</p>
+        <p className="text-sm text-[#6B6860] mt-2 ml-0">{t("revival.subtitle", "Products needing attention — improve them to boost visibility.")}</p>
         <div
           className="mt-3 h-[3px] w-20 rounded-full"
           style={{ background: "linear-gradient(90deg, #7CE25B, #3FC7E9, #E6429B)" }}
@@ -104,9 +106,9 @@ export default function RevivalEngine() {
             className="text-lg font-bold text-[#0B0B0F] mb-2"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            All products are healthy!
+            {t("revival.allHealthy", "All products are healthy!")}
           </h3>
-          <p className="text-sm text-[#6B6860]">Keep up the great work. Add more products to grow your catalogue.</p>
+          <p className="text-sm text-[#6B6860]">{t("revival.allHealthyDesc", "Keep up the great work. Add more products to grow your catalogue.")}</p>
         </div>
       ) : (
         <div className="space-y-5">
@@ -151,7 +153,7 @@ export default function RevivalEngine() {
                     {health.recommendations?.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-[#6B6860] uppercase tracking-wider mb-3">
-                          Improvement Tips
+                          {t("revival.tips", "Improvement Tips")}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {health.recommendations.map((rec: any, i: number) => {

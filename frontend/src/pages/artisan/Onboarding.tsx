@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { apiCall } from "../../api";
 import { CheckCircle, ArrowRight, ArrowLeft, Loader } from "lucide-react";
 
@@ -17,8 +19,6 @@ const STATES = [
   "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi"
 ];
 
-const STEP_LABELS = ["About You", "Your Craft", "Your Story"];
-
 export default function ArtisanOnboarding() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -28,7 +28,14 @@ export default function ArtisanOnboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { refreshUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const STEP_LABELS = [
+    t("onboarding.step1", "About You"),
+    t("onboarding.step2", "Your Craft"),
+    t("onboarding.step3", "Your Story")
+  ];
 
   const update = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
 
@@ -39,7 +46,7 @@ export default function ArtisanOnboarding() {
       refreshUser();
       navigate("/artisan/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to save. Try again.");
+      setError(err.message || t("common.error", "Failed to save. Try again."));
       setLoading(false);
     }
   };
@@ -51,21 +58,25 @@ export default function ArtisanOnboarding() {
     <div className="min-h-screen bg-[#F7F5F0] flex flex-col">
 
       {/* ── Dark hero header ── */}
-      <div className="bg-[#0B0B0F] px-4 pt-10 pb-8">
+      <div className="bg-[#0B0B0F] px-4 pt-10 pb-8 relative">
+        <div className="absolute top-4 right-4 z-20">
+          <LanguageSelector variant="dark" compact={false} />
+        </div>
+
         <div className="max-w-lg mx-auto text-center">
           <span
             className="text-2xl font-bold text-white tracking-tight"
             style={{ fontFamily: "Space Grotesk, sans-serif" }}
           >
-            Kala<span className="text-[#7CE25B]">Saarthi</span>
+            {t("brand.name", "KalaSaarthi")}
           </span>
-          <p className="text-[#6B6860] text-sm mt-2">Your guide to selling handcrafted art online</p>
+          <p className="text-[#6B6860] text-sm mt-2">{t("brand.tagline", "Your guide to selling handcrafted art online")}</p>
 
           <h1
             className="text-white text-xl font-bold mt-6 mb-1"
             style={{ fontFamily: "Space Grotesk, sans-serif" }}
           >
-            Let's set up your artisan profile
+            {t("onboarding.welcome", "Let's set up your artisan profile")}
           </h1>
           <p className="text-[#6B6860] text-sm">
             Step {step} of {STEP_LABELS.length} — {STEP_LABELS[step - 1]}
@@ -121,13 +132,13 @@ export default function ArtisanOnboarding() {
               <div>
                 <div className="mb-6">
                   <h2 className="text-lg font-bold text-[#0B0B0F]" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-                    Tell us about yourself
+                    {t("profile.personalInfo", "Tell us about yourself")}
                   </h2>
                   <p className="text-[#6B6860] text-sm mt-1">This helps us personalise KalaSaarthi for you.</p>
                 </div>
                 <div className="space-y-5">
                   <div>
-                    <label className={labelClass}>Your Full Name</label>
+                    <label className={labelClass}>{t("auth.fullName", "Your Full Name")}</label>
                     <input
                       type="text"
                       className={inputClass}
@@ -137,7 +148,7 @@ export default function ArtisanOnboarding() {
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Phone Number</label>
+                    <label className={labelClass}>{t("cart.phone", "Phone Number")}</label>
                     <input
                       type="tel"
                       className={inputClass}
@@ -178,7 +189,7 @@ export default function ArtisanOnboarding() {
               <div>
                 <div className="mb-6">
                   <h2 className="text-lg font-bold text-[#0B0B0F]" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-                    Your Craft
+                    {t("profile.craftDetails", "Your Craft")}
                   </h2>
                   <p className="text-[#6B6860] text-sm mt-1">
                     Tell us what you create. This helps us show relevant tools, pricing, and opportunities.
@@ -186,7 +197,7 @@ export default function ArtisanOnboarding() {
                 </div>
                 <div className="space-y-5">
                   <div>
-                    <label className={labelClass}>Type of Craft</label>
+                    <label className={labelClass}>{t("profile.craftType", "Type of Craft")}</label>
                     <div className="grid grid-cols-2 gap-2 mt-1">
                       {CRAFTS.map(c => (
                         <button
@@ -205,7 +216,7 @@ export default function ArtisanOnboarding() {
                     </div>
                   </div>
                   <div>
-                    <label className={labelClass}>Materials You Use</label>
+                    <label className={labelClass}>{t("addProduct.materials", "Materials You Use")}</label>
                     <input
                       type="text"
                       className={inputClass}
@@ -216,7 +227,7 @@ export default function ArtisanOnboarding() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className={labelClass}>Years of Experience</label>
+                      <label className={labelClass}>{t("profile.experience", "Years of Experience")}</label>
                       <input
                         type="number"
                         min={0}
@@ -227,7 +238,7 @@ export default function ArtisanOnboarding() {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Monthly Production</label>
+                      <label className={labelClass}>{t("profile.capacity", "Monthly Production")}</label>
                       <input
                         type="text"
                         className={inputClass}
@@ -246,7 +257,7 @@ export default function ArtisanOnboarding() {
               <div>
                 <div className="mb-6">
                   <h2 className="text-lg font-bold text-[#0B0B0F]" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-                    About Your Work
+                    {t("profile.yourStory", "About Your Work")}
                   </h2>
                   <p className="text-[#6B6860] text-sm mt-1">A short bio helps buyers connect with your story.</p>
                 </div>
@@ -256,7 +267,7 @@ export default function ArtisanOnboarding() {
                     <input
                       type="text"
                       className={inputClass}
-                      placeholder="e.g. Hindi, English, Telugu"
+                      placeholder="e.g. Hindi, English, Marathi, Tamil"
                       value={form.language}
                       onChange={e => update("language", e.target.value)}
                     />
@@ -298,9 +309,9 @@ export default function ArtisanOnboarding() {
               {step > 1 ? (
                 <button
                   onClick={() => setStep(s => s - 1)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 border border-[#E8E6E1] rounded-xl font-medium text-[#6B6860] hover:text-[#0B0B0F] hover:bg-[#F7F5F0] transition text-sm"
+                  className="flex items-center gap-1.5 px-4 py-2.5 border border-[#E8E6E1] rounded-xl font-medium text-[#6B6860] hover:text-[#0B0B0F] hover:bg-[#F7F5F0] transition text-sm cursor-pointer"
                 >
-                  <ArrowLeft className="w-4 h-4" /> Back
+                  <ArrowLeft className="w-4 h-4" /> {t("common.back", "Back")}
                 </button>
               ) : (
                 <div />
@@ -310,27 +321,23 @@ export default function ArtisanOnboarding() {
                 <button
                   onClick={() => setStep(s => s + 1)}
                   disabled={step === 1 && !form.name}
-                  className="bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#6dd44f] disabled:opacity-40 transition flex items-center gap-2 text-sm"
+                  className="bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#6dd44f] disabled:opacity-40 transition flex items-center gap-2 text-sm cursor-pointer"
                 >
-                  Continue <ArrowRight className="w-4 h-4" />
+                  {t("common.continue", "Continue")} <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#6dd44f] disabled:opacity-40 transition flex items-center gap-2 text-sm"
+                  className="bg-[#7CE25B] text-[#0B0B0F] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#6dd44f] disabled:opacity-40 transition flex items-center gap-2 text-sm cursor-pointer"
                 >
                   {loading
-                    ? <><Loader className="w-4 h-4 animate-spin" /> Saving…</>
-                    : <>Complete Setup <ArrowRight className="w-4 h-4" /></>}
+                    ? <><Loader className="w-4 h-4 animate-spin" /> {t("common.saving", "Saving…")}</>
+                    : <>{t("onboarding.complete", "Complete Setup")} <ArrowRight className="w-4 h-4" /></>}
                 </button>
               )}
             </div>
           </div>
-
-          <p className="text-center text-xs text-[#6B6860] mt-5">
-            You can update your profile anytime from settings.
-          </p>
         </div>
       </div>
     </div>

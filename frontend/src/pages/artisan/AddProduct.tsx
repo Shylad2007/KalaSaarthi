@@ -6,11 +6,18 @@ import {
   AlertTriangle, Info, Activity, Square, Loader
 } from "lucide-react";
 import { apiCall, uploadCall } from "../../api";
+import { useLanguage } from "../../i18n/LanguageContext";
 import ArtisanLayout from "../../components/ArtisanLayout";
 
-const STEPS = ["Photo", "Describe", "Catalog", "Pricing", "Publish"];
-
 export default function AddProduct() {
+  const { t } = useLanguage();
+  const STEPS = [
+    t("addProduct.stepPhoto", "Photo"),
+    t("addProduct.stepDescribe", "Describe"),
+    t("addProduct.stepCatalog", "Details"),
+    t("addProduct.stepPricing", "Pricing"),
+    t("addProduct.stepPublish", "Publish")
+  ];
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -215,17 +222,17 @@ export default function AddProduct() {
         {/* Back link */}
         <button
           onClick={() => navigate("/artisan/products")}
-          className="mb-6 flex items-center gap-1.5 text-[#6B6860] hover:text-[#0B0B0F] transition text-sm font-medium"
+          className="mb-6 flex items-center gap-1.5 text-[#6B6860] hover:text-[#0B0B0F] transition text-sm font-medium cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to My Catalogue
+          <ArrowLeft className="w-4 h-4" /> {t("nav.catalogue", "Back to My Catalogue")}
         </button>
 
         {/* Page heading */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-[#0B0B0F]" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-            Add New Product
+            {t("addProduct.title", "Add New Handcrafted Product")}
           </h1>
-          <p className="text-[#6B6860] text-sm mt-1">Follow the steps to list your craft on the marketplace.</p>
+          <p className="text-[#6B6860] text-sm mt-1">{t("brand.tagline", "Follow the steps to list your craft on the marketplace.")}</p>
         </div>
 
         {/* Step indicator */}
