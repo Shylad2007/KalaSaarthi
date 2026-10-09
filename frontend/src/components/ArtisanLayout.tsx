@@ -7,6 +7,10 @@ import { useState } from "react";
 
 const NAV = [
   { to: "/artisan/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/artisan/products", label: "My Catalogue", icon: Package },
+  { to: "/artisan/add-product", label: "Add Product", icon: Plus },
+  { to: "/artisan/revival", label: "Revival Engine", icon: Zap },
+  { to: "/artisan/opportunities", label: "Opportunities", icon: Compass },
   { to: "/artisan/orders", label: "Orders", icon: ShoppingBag },
   { to: "/artisan/profile", label: "Profile", icon: User },
 ];

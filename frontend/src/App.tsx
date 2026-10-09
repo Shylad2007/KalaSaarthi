@@ -11,7 +11,13 @@ import BuyerRegister from "./pages/auth/BuyerRegister";
 // Artisan pages
 import ArtisanOnboarding from "./pages/artisan/Onboarding";
 import ArtisanDashboard from "./pages/artisan/Dashboard";
+import ProductCatalogue from "./pages/artisan/ProductCatalogue";
+import AddProduct from "./pages/artisan/AddProduct";
+import EditProduct from "./pages/artisan/EditProduct";
+import RevivalEngine from "./pages/artisan/RevivalEngine";
+import Opportunities from "./pages/artisan/Opportunities";
 import ArtisanOrders from "./pages/artisan/ArtisanOrders";
+import ArtisanProfile from "./pages/artisan/ArtisanProfile";
 
 // Buyer pages
 import Marketplace from "./pages/buyer/Marketplace";
@@ -61,8 +67,26 @@ export default function App() {
           <Route path="/artisan/dashboard" element={
             <ProtectedRoute role="artisan"><ArtisanDashboard /></ProtectedRoute>
           } />
+          <Route path="/artisan/products" element={
+            <ProtectedRoute role="artisan"><ProductCatalogue /></ProtectedRoute>
+          } />
+          <Route path="/artisan/add-product" element={
+            <ProtectedRoute role="artisan"><AddProduct /></ProtectedRoute>
+          } />
+          <Route path="/artisan/edit-product/:id" element={
+            <ProtectedRoute role="artisan"><EditProduct /></ProtectedRoute>
+          } />
+          <Route path="/artisan/revival" element={
+            <ProtectedRoute role="artisan"><RevivalEngine /></ProtectedRoute>
+          } />
+          <Route path="/artisan/opportunities" element={
+            <ProtectedRoute role="artisan"><Opportunities /></ProtectedRoute>
+          } />
           <Route path="/artisan/orders" element={
             <ProtectedRoute role="artisan"><ArtisanOrders /></ProtectedRoute>
+          } />
+          <Route path="/artisan/profile" element={
+            <ProtectedRoute role="artisan"><ArtisanProfile /></ProtectedRoute>
           } />
 
           {/* Buyer */}
@@ -73,6 +97,7 @@ export default function App() {
           <Route path="/login" element={<Navigate to="/artisan/login" />} />
           <Route path="/register" element={<Navigate to="/artisan/register" />} />
           <Route path="/dashboard" element={<Navigate to="/artisan/dashboard" />} />
+          <Route path="/add-product" element={<Navigate to="/artisan/add-product" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

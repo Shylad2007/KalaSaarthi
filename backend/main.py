@@ -15,7 +15,7 @@ from app.services.ai_service import AIService
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
-import os, asyncio
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -354,6 +354,240 @@ ALL_OPPORTUNITIES = [
         "icon": "users"
     },
 ]
+
+@app.route("/api/opportunities", methods=["GET"])
+def get_opportunities():
+    profile = None
+    token = request.headers.get("Authorization", "")
+    if token.startswith("Bearer "):
+        try:
+            payload = jwt.decode(token.split(" ")[1], SECRET_KEY, algorithms=["HS256"])
+            user = db_session.query(User).filter_by(email=payload["sub"]).first()
+            if user and user.role == "artisan":
+                profile = db_session.query(ArtisanProfile).filter_by(user_id=user.id).first()
+        except Exception:
+            pass
+
+    result = []
+    for opp in ALL_OPPORTUNITIES:
+        score = 0
+        reasons = []
+
+        if profile:
+            craft_lower = (profile.craft or "").lower()
+            state_lower = (profile.state or profile.region or "").lower()
+
+            craft_match = opp["crafts"] == ["all"] or any(c in craft_lower for c in opp["crafts"])
+            state_match = opp["states"] == ["all"] or any(s in state_lower for s in opp["states"])
+
+            if craft_match: score += 2; reasons.append(f"Matches your craft: {profile.craft}")
+            if state_match: score += 3; reasons.append(f"Available in {profile.state or profile.region}")
+            if opp["crafts"] == ["all"]: score += 1
+        else:
+            score = 1
+
+        result.append({**opp, "relevance_score": score, "relevance_reasons": reasons})
+
+    result.sort(key=lambda x: x["relevance_score"], reverse=True)
+    return jsonify(result)
+
+# ─── Products ──────────────────────────────────────────────────────────────
+
+@app.route("/api/products", methods=["GET"])
+def list_products():
+    search = request.args.get("q", "").lower()
+    category = request.args.get("category", "")
+    products = db_session.query(Product).filter_by(is_published=True).all()
+    result = [serialize_product(p, include_artisan=True) for p in products]
+    if search:
+        result = [p for p in result if search in (p.get("name") or "").lower()
+                  or search in (p.get("description") or "").lower()
+                  or search in (p.get("tags") or "").lower()]
+    if category:
+        result = [p for p in result if (p.get("category") or "").lower() == category.lower()]
+    return jsonify(result)
+
+@app.route("/api/products/my", methods=["GET"])
+@artisan_required
+def my_products():
+    profile = db_session.query(ArtisanProfile).filter_by(user_id=request.user.id).first()
+    if not profile:
+        return jsonify([])
+    products = db_session.query(Product).filter_by(artisan_id=profile.id).order_by(Product.created_at.desc()).all()
+    return jsonify([serialize_product(p) for p in products])
+
+@app.route("/api/products", methods=["POST"])
+@artisan_required
+def create_product():
+    data = request.get_json() or {}
+    profile = db_session.query(ArtisanProfile).filter_by(user_id=request.user.id).first()
+    if not profile:
+        return jsonify({"detail": "Artisan profile not found"}), 400
+    allowed = ["name", "category", "description", "materials", "color", "production_time", "tags", "final_price"]
+    kwargs = {k: v for k, v in data.items() if k in allowed}
+    p = Product(artisan_id=profile.id, **kwargs)
+    db_session.add(p)
+    db_session.commit()
+    return jsonify(serialize_product(p))
+
+@app.route("/api/products/<int:product_id>", methods=["GET"])
+def get_product(product_id):
+    p = db_session.query(Product).get(product_id)
+    if not p:
+        return jsonify({"detail": "Not found"}), 404
+    # Increment view count
+    p.views = (p.views or 0) + 1
+    db_session.commit()
+    return jsonify(serialize_product(p, include_artisan=True))
+
+@app.route("/api/products/<int:product_id>", methods=["PUT"])
+@artisan_required
+def update_product(product_id):
+    profile = db_session.query(ArtisanProfile).filter_by(user_id=request.user.id).first()
+    if not profile: return jsonify({"detail": "Forbidden"}), 403
+    p = db_session.query(Product).get(product_id)
+    if not p: return jsonify({"detail": "Not found"}), 404
+    if p.artisan_id != profile.id: return jsonify({"detail": "Forbidden"}), 403
+
+    data = request.get_json() or {}
+    allowed = ["name", "category", "description", "materials", "color", "production_time",
+               "tags", "final_price", "ai_suggested_price", "is_published"]
+    for k, v in data.items():
+        if k in allowed:
+            setattr(p, k, v)
+    db_session.commit()
+    return jsonify(serialize_product(p))
+
+# ─── Image ────────────────────────────────────────────────────────────────
+
+@app.route("/api/products/<int:product_id>/image", methods=["POST"])
+@artisan_required
+def upload_image(product_id):
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"detail": "No file provided"}), 400
+
+    # Ownership check
+    profile = db_session.query(ArtisanProfile).filter_by(user_id=request.user.id).first()
+    if not profile:
+        return jsonify({"detail": "Artisan profile not found"}), 403
+    p = db_session.query(Product).get(product_id)
+    if not p:
+        return jsonify({"detail": "Product not found"}), 404
+    if p.artisan_id != profile.id:
+        return jsonify({"detail": "Forbidden"}), 403
+
+    file_bytes = file.read()
+    mime_type = file.mimetype or "application/octet-stream"
+    filename = file.filename or "upload.jpg"
+
+    # Validate & upload to Supabase
+    try:
+        url = StorageService.upload_image(request.user.id, product_id, file_bytes, mime_type, filename)
+    except ValueError as e:
+        return jsonify({"detail": str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({"detail": str(e)}), 502
+
+    # Image quality analysis (non-critical)
+    try:
+        analysis = AIService.analyze_image(file_bytes)
+    except Exception:
+        analysis = {"score": None}
+
+    # Replace existing image record (delete old, insert new)
+    existing = db_session.query(ProductImage).filter_by(product_id=p.id).first()
+    if existing:
+        db_session.delete(existing)
+
+    img = ProductImage(product_id=p.id, image_url=url, is_enhanced=False)
+    db_session.add(img)
+    p.image_quality_score = analysis.get("score")
+    db_session.commit()
+    return jsonify({"id": img.id, "url": url, "analysis": analysis})
+
+# ─── AI ───────────────────────────────────────────────────────────────────
+
+@app.route("/api/ai/transcribe", methods=["POST"])
+@token_required
+def transcribe():
+    file = request.files.get("audio")
+    if not file:
+        return jsonify({"detail": "No audio file provided"}), 400
+
+    mime_type = file.mimetype or "audio/webm"
+    if not mime_type.startswith("audio/"):
+        mime_type = "audio/webm"
+
+    audio_bytes = file.read()
+
+    # Reject extremely small payloads before hitting the API
+    if len(audio_bytes) < 1024:
+        return jsonify({"text": "", "no_speech": True,
+                        "message": "Recording was too short or empty. Please speak clearly and try again."})
+
+    try:
+        text = AIService.transcribe_audio(audio_bytes, mime_type)
+        if not text:
+            return jsonify({"text": "", "no_speech": True,
+                            "message": "No speech was detected. Please speak clearly and try again."})
+        return jsonify({"text": text, "no_speech": False})
+    except RuntimeError as e:
+        return jsonify({"detail": str(e)}), 500
+    except Exception as e:
+        return jsonify({"detail": f"Transcription failed: {e}"}), 500
+
+@app.route("/api/ai/generate-catalog", methods=["POST"])
+@artisan_required
+def generate_catalog():
+    data = request.get_json() or {}
+    description = data.get("description", "").strip()
+    if not description:
+        return jsonify({"detail": "Description required"}), 400
+    catalog = AIService.generate_catalog(description, data.get("image_url", ""))
+    return jsonify(catalog)
+
+@app.route("/api/ai/recommend-price", methods=["POST"])
+@artisan_required
+def recommend_price():
+    data = request.get_json() or {}
+    result = AIService.recommend_price(
+        materials=data.get("materials", ""),
+        production_time=data.get("production_time", ""),
+        category=data.get("category", ""),
+        description=data.get("description", ""),
+    )
+    return jsonify(result)
+
+@app.route("/api/products/<int:product_id>/health", methods=["GET"])
+@artisan_required
+def product_health(product_id):
+    p = db_session.query(Product).get(product_id)
+    if not p:
+        return jsonify({"detail": "Not found"}), 404
+    return jsonify(AIService.calculate_health(serialize_product(p)))
+
+# ─── Revival Engine ────────────────────────────────────────────────────────
+
+@app.route("/api/artisan/revival", methods=["GET"])
+@artisan_required
+def revival_engine():
+    profile = db_session.query(ArtisanProfile).filter_by(user_id=request.user.id).first()
+    if not profile:
+        return jsonify([])
+    products = db_session.query(Product).filter_by(artisan_id=profile.id).all()
+    result = []
+    for p in products:
+        health = AIService.calculate_health(serialize_product(p))
+        if health["score"] < 80:
+            result.append({
+                "product": serialize_product(p),
+                "health": health
+            })
+    result.sort(key=lambda x: x["health"]["score"])
+    return jsonify(result)
+
+# ─── Cart & Orders ─────────────────────────────────────────────────────────
 
 @app.route("/api/cart", methods=["GET"])
 @buyer_required
